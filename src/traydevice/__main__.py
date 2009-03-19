@@ -27,17 +27,17 @@ import logging.config
 #fully qualified so that package data(version) is available
 import device
 import gui
-from traydevice import __version__
+from traydevice import __version__ as package_version
+from traydevice import __name__ as package_name
+from traydevice import __data_dir__ as package_data
 
 
 def get_resource(resource):
     """
         Retrieve resource files
     """
-    _resource = os.path.join(os.path.dirname(__file__), resource)
-    if not os.path.exists( _resource ):
-        _resource = os.path.join(sys.prefix, 'share/traydevice/'+resource)
-    return _resource
+    _resource_dir = os.path.join(os.path.dirname(__file__), package_data)
+    return os.path.join(_resource_dir, resource)
 
 
 def get_config_file(filename):
@@ -62,7 +62,7 @@ class Main:
         _prog = "%prog"
         configfile = get_config_file('default.xml')
         parser = OptionParser(usage="%prog [options] <device_file>",
-                              version="%s %s" % (_prog, __version__))
+                              version="%s %s" % (_prog, package_version))
         parser.add_option('-c', '--configfile',
             dest='configfile',
             help='read configuration from FILE instead of default in %s' %

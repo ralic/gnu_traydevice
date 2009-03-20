@@ -167,9 +167,9 @@ setup(
     package_dir={traydevice.__name__: 'src/traydevice'},
     package_data={traydevice.__name__:['package.ini']},
     data_files=manpage_data_files + [
-                ('share/' + traydevice.__name__, glob.glob('data/*')),
-                ('share/' + traydevice.__name__, ['README.txt']),
-                ('share/' + traydevice.__name__, ['LICENSE.txt'])
+                ('', glob.glob('data/*')),
+                ('', ['README.txt']),
+                ('', ['LICENSE.txt'])
                ],
     scripts=glob.glob('scripts/*'),
     author='Martin Špelina',

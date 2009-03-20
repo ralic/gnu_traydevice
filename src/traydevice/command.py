@@ -43,10 +43,11 @@ class Command:
             if arg.tag == 'ref':
                 args.append(self.device.get_property(arg.text))
 
+        self.logger.debug('Executing:'+str(args))
         command = subprocess.Popen(args,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         result = command.communicate()
         result = command.returncode, result
-        self.logger.debug(result)
+        self.logger.debug('Result:'+str(result))
         return result

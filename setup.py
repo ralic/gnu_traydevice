@@ -45,12 +45,10 @@ class package_ini(Command):
 
     def initialize_options(self):
         self.packages = None
-        pass
 
     def finalize_options(self):
         self.set_undefined_options(build_py.__name__,
                                    ('packages', 'packages'))
-        pass
 
     def visit(self, dirname, names):
         if basename(dirname) in self.packages:
@@ -97,7 +95,6 @@ class package_ini(Command):
             self.distribution.get_command_obj(install.__name__).install_lib,
             package_ini.visit,
             self)
-        pass
 
 
 class install_manpage(install_data):
@@ -118,7 +115,6 @@ class install_manpage(install_data):
             manpages = glob.glob('build/man/*.%i' % mantype)
             if manpages:
                 self.data_files += [('man%i' % mantype, manpages)]
-        pass
 
 
 class install(_install):
@@ -139,7 +135,6 @@ class install(_install):
         if self.root is not None:
             self.change_roots('man')
         self.install_man = os.path.join(self.install_base, self.install_man)
-        pass
 
 
 class build_manpage(Command):

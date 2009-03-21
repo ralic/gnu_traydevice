@@ -69,8 +69,8 @@ class package_ini(Command):
         """
         match = re.match('(?P<identifier>\w+)\s*=.*##SETUP_PATCH\\((?P<command>.*)\.(?P<variable>.*)\\)', line)
         if not match:
-            return line 
-        print 'Replacing:'+line 
+            return line
+        print 'Replacing:'+line
         line = match.group('identifier')
         line += ' = '
         data = '(self).distribution.get_command_obj(\''+\
@@ -80,7 +80,6 @@ class package_ini(Command):
         line += '\n'
         print 'With:' + line
         return line
-
 
 
     """
@@ -95,23 +94,61 @@ class package_ini(Command):
         pass
 
 
+
+class install_manpage(install_data):
+    """Install manpages that are already built in build directory"""
+    user_options=[]
+    def initialize_options (self):
+        install_data.initialize_options(self)
+        self.build_base = None
+        self.data_files = []
+    def finalize_options (self):
+        self.set_undefined_options('install',
+                                   ('install_man', 'install_dir'),
+                                   ('build_base', 'build_base'),
+                                  )
+        for mantype in xrange(1, 9):
+            manpages = glob.glob('build/man/*.%i' % mantype)
+            if manpages:
+                self.data_files += [('man%i' % mantype, manpages)]
+        pass
+
+
 class install(_install):
     sub_commands = _install.sub_commands + [
-           (package_ini.__name__, None)
-        ]
+           (package_ini.__name__, None),
+           (install_manpage.__name__, None)
+    ]
 
-class manpage(Command):
+    user_options = _install.user_options + [
+        ('install-man=', None, "directory for Unix man pages")
+    ]
+
+
+    def initialize_options(self):
+        _install.initialize_options(self)
+        self.install_man = 'man'
+
+    def finalize_options(self):
+        _install.finalize_options(self)
+        self.convert_paths('man')
+        if self.root is not None:
+            self.change_roots('man')
+        self.install_man=os.path.join(self.install_base, self.install_man)
+        pass
+
+
+class build_manpage(Command):
     """Create a manpages from docbook source"""
 
     user_options = []
 
     def initialize_options(self):
-        #location of build dir
-        self.build_base = self.distribution.get_command_obj(build.__name__).build_base
-        pass
+        self.build_base = None#location of build dir
 
     def finalize_options(self):
-        pass
+        self.set_undefined_options('build',
+                                   ('build_base', 'build_base'))
 
     def man(self, input_file):
         source = join(
@@ -132,10 +169,10 @@ class manpage(Command):
             self.man(source)
 
 class build(_build):
-    """Make build process call manpage command"""
+    """Make build process call build_manpage command"""
 
     sub_commands = _build.sub_commands + [
-        (manpage.__name__, None)
+        (build_manpage.__name__, None)
     ]
 
     def __init__(self, dist):
@@ -145,19 +182,14 @@ class build(_build):
 
 docs = pydoc.splitdoc(traydevice.__doc__)
 
-manpage_data_files = []
-for mantype in xrange(1, 9):
-    manpages = glob.glob('build/man/*.%i' % mantype)
-    if manpages:
-        manpage_data_files += [('share/man/man%i' % mantype, manpages)]
-
 setup(
     cmdclass={build.__name__: build,
-              manpage.__name__: manpage,
+              build_manpage.__name__: build_manpage,
+              install_manpage.__name__: install_manpage,
               install_data.__name__: install_data,
               install_lib.__name__: install_lib,
               install.__name__: install,
-              package_ini.__name__: package_ini 
+              package_ini.__name__: package_ini
              },
     name=traydevice.__name__,
     version=traydevice.__version__,
@@ -166,8 +198,7 @@ setup(
     packages=[traydevice.__name__],
     package_dir={traydevice.__name__: 'src/traydevice'},
     package_data={traydevice.__name__:['package.ini']},
-    data_files=manpage_data_files + [
-                ('', glob.glob('data/*')),
+    data_files=[('', glob.glob('data/*')),
                 ('', ['README.txt']),
                 ('', ['LICENSE.txt'])
                ],

@@ -35,28 +35,33 @@ import traydevice
 import pydoc
 import re
 
+
 class package_ini(Command):
     """
-        Locate 'package.ini' in all installed packages and patch it as requested
-        by wildcard references to install process.
+        Locate 'package.ini' in all installed packages and patch it as
+        requested by wildcard references to install process.
     """
     user_options = []
+
     def initialize_options(self):
+        self.packages = None
         pass
+
     def finalize_options(self):
+        self.set_undefined_options(build_py.__name__,
+                                   ('packages', 'packages'))
         pass
 
     def visit(self, dirname, names):
-        packages = self.distribution.get_command_obj(build_py.__name__).packages
-        if basename(dirname) in packages:
+        if basename(dirname) in self.packages:
             if 'package.ini' in names:
                 self.patch(join(dirname, 'package.ini'))
 
     def patch(self, ini_file):
         print 'patching file' + ini_file
-        with open(ini_file,'r') as infile:
+        with open(ini_file, 'r') as infile:
             file_data = infile.readlines()
-        with open(ini_file,'w') as outfile:
+        with open(ini_file, 'w') as outfile:
             for line in file_data:
                 _line = self.patch_line(line)
                 if _line:
@@ -67,42 +72,44 @@ class package_ini(Command):
         """
             Patch an installed package.ini with setup's variables
         """
-        match = re.match('(?P<identifier>\w+)\s*=.*##SETUP_PATCH\\((?P<command>.*)\.(?P<variable>.*)\\)', line)
+        match = re.match("""
+            (?P<identifier>\w+)\s*=.*\#\#SETUP_PATCH
+                \\((?P<command>.*)\.(?P<variable>.*)\\)""", line, re.VERBOSE)
         if not match:
             return line
-        print 'Replacing:'+line
+        print 'Replacing:' + line
         line = match.group('identifier')
         line += ' = '
-        data = '(self).distribution.get_command_obj(\''+\
-                match.group('command')+'\')'+'.'+\
+        data = '(self).distribution.get_command_obj(\'' + \
+                match.group('command') + '\')' + '.' + \
                 match.group('variable')
-        line += '\''+eval(data)+'\''
+        line += '\'' + eval(data) + '\''
         line += '\n'
         print 'With:' + line
         return line
 
-
-    """
-        Patch package.ini files in distribution package with variables from setup
-    """
     def run(self):
+        """
+            Patch package.ini files in distribution package
+            with variables from setup
+        """
         walk(
             self.distribution.get_command_obj(install.__name__).install_lib,
             package_ini.visit,
-            self
-        )
+            self)
         pass
-
 
 
 class install_manpage(install_data):
     """Install manpages that are already built in build directory"""
-    user_options=[]
-    def initialize_options (self):
+    user_options = []
+
+    def initialize_options(self):
         install_data.initialize_options(self)
         self.build_base = None
         self.data_files = []
-    def finalize_options (self):
+
+    def finalize_options(self):
         self.set_undefined_options('install',
                                    ('install_man', 'install_dir'),
                                    ('build_base', 'build_base'),
@@ -117,13 +124,10 @@ class install_manpage(install_data):
 class install(_install):
     sub_commands = _install.sub_commands + [
            (package_ini.__name__, None),
-           (install_manpage.__name__, None)
-    ]
+           (install_manpage.__name__, None)]
 
     user_options = _install.user_options + [
-        ('install-man=', None, "directory for Unix man pages")
-    ]
-
+        ('install-man=', None, "directory for Unix man pages")]
 
     def initialize_options(self):
         _install.initialize_options(self)
@@ -134,7 +138,7 @@ class install(_install):
         self.convert_paths('man')
         if self.root is not None:
             self.change_roots('man')
-        self.install_man=os.path.join(self.install_base, self.install_man)
+        self.install_man = os.path.join(self.install_base, self.install_man)
         pass
 
 
@@ -168,16 +172,15 @@ class build_manpage(Command):
         for source in glob.glob(join(doc_dir, '*.xml')):
             self.man(source)
 
+
 class build(_build):
     """Make build process call build_manpage command"""
 
     sub_commands = _build.sub_commands + [
-        (build_manpage.__name__, None)
-    ]
+        (build_manpage.__name__, None)]
 
     def __init__(self, dist):
         _build.__init__(self, dist)
-
 
 
 docs = pydoc.splitdoc(traydevice.__doc__)
@@ -189,19 +192,17 @@ setup(
               install_data.__name__: install_data,
               install_lib.__name__: install_lib,
               install.__name__: install,
-              package_ini.__name__: package_ini
-             },
+              package_ini.__name__: package_ini},
     name=traydevice.__name__,
     version=traydevice.__version__,
     description=docs[0],
     long_description=docs[1],
     packages=[traydevice.__name__],
     package_dir={traydevice.__name__: 'src/traydevice'},
-    package_data={traydevice.__name__:['package.ini']},
+    package_data={traydevice.__name__: ['package.ini']},
     data_files=[('', glob.glob('data/*')),
                 ('', ['README.txt']),
-                ('', ['LICENSE.txt'])
-               ],
+                ('', ['LICENSE.txt'])],
     scripts=glob.glob('scripts/*'),
     author='Martin Špelina',
     author_email='shpelda at seznam dot cz',

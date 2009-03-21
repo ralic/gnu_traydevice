@@ -20,8 +20,6 @@ Traydevice is a little systray application allowing you to conveniently execute
 configured commands on the specified device.
 """
 import os
-__version__ = '2.0.devel'
-__data_dir__ = None
 inipath = os.path.join(os.path.dirname(__file__), 'package.ini')
 with open(inipath) as ini:
     for line in ini.readlines():

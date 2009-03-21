@@ -35,7 +35,6 @@ import traydevice
 import pydoc
 import re
 
-
 class package_ini(Command):
     """
         Locate 'package.ini' in all installed packages and patch it as
@@ -45,10 +44,12 @@ class package_ini(Command):
 
     def initialize_options(self):
         self.packages = None
+        self.version = None
 
     def finalize_options(self):
         self.set_undefined_options(build_py.__name__,
                                    ('packages', 'packages'))
+        self.version = self.distribution.get_version()
 
     def visit(self, dirname, names):
         if basename(dirname) in self.packages:
@@ -81,7 +82,7 @@ class package_ini(Command):
         data = '(self).distribution.get_command_obj(\'' + \
                 match.group('command') + '\')' + '.' + \
                 match.group('variable')
-        line += '\'' + eval(data) + '\''
+        line += '\'' + str(eval(data)) + '\''
         line += '\n'
         print 'With:' + line
         return line
@@ -189,7 +190,7 @@ setup(
               install.__name__: install,
               package_ini.__name__: package_ini},
     name=traydevice.__name__,
-    version=traydevice.__version__,
+    version='devel',
     description=docs[0],
     long_description=docs[1],
     packages=[traydevice.__name__],

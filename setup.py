@@ -18,6 +18,7 @@
 from distutils.command.build import build as _build
 from distutils.command.install_data import install_data
 from distutils.command.install import install as _install
+from distutils.command.sdist import sdist as _sdist
 from distutils.core import setup
 from distutils.core import Command
 from distutils.errors import DistutilsFileError
@@ -60,14 +61,13 @@ class package_ini(Command):
     def initialize_options(self):
         self.packages = None
         self.install_lib = None
-        self.version = None
+        self.version = self.distribution.get_version()
 
     def finalize_options(self):
         self.set_undefined_options(build_py.__name__,
                                    ('packages', 'packages'))
         self.set_undefined_options(install.__name__,
                                    ('install_lib', 'install_lib'))
-        self.version = self.distribution.get_version()
 
     def visit(self, dirname, names):
         if basename(dirname) in self.packages:
@@ -201,6 +201,29 @@ class build(_build):
         _build.__init__(self, dist)
 
 
+class sdist(_sdist):
+    """
+        Take version from command line
+    """
+    user_options = _sdist.user_options + [
+        ('version=', None, "version of deployed application")]
+
+    def initialize_options(self):
+        _sdist.initialize_options(self)
+        self.version = 'devel'
+
+    def finalize_options(self):
+        _sdist.finalize_options(self)
+
+    def run(self):
+        self.distribution.metadata.version = self.version
+        with open('setup.cfg', 'w') as setup_cfg:
+            setup_cfg.write('[' + package_ini.__name__ + ']\n')
+            setup_cfg.write('version=' + self.version)
+        _sdist.run(self)
+        os.remove('setup.cfg')
+
+
 docs = pydoc.splitdoc(traydevice.__doc__)
 
 setup(
@@ -209,9 +232,9 @@ setup(
               install_manpage.__name__: install_manpage,
               install_data.__name__: install_data,
               install.__name__: install,
+              sdist.__name__: sdist,
               package_ini.__name__: package_ini},
     name=traydevice.__name__,
-    version='devel',
     description=docs[0],
     long_description=docs[1],
     packages=[traydevice.__name__],

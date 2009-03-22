@@ -16,8 +16,7 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from distutils.command.build import build as _build
-from distutils.command.install_data import install_data as install_data
-from distutils.command.install_lib import install_lib as install_lib
+from distutils.command.install_data import install_data
 from distutils.command.install import install as _install
 from distutils.core import setup
 from distutils.core import Command
@@ -26,14 +25,30 @@ from distutils.command.build_py import build_py
 import subprocess
 import shutil
 import os
-import fileinput
-import glob
+from glob import glob
 import sys
 from os.path import *
 sys.path.insert(0, join(dirname(__file__), 'src'))
 import traydevice
 import pydoc
 import re
+
+
+def patch_file(patch_line, file_to_patch):
+    """
+        Modifies a file in place applying 'patch_line' function
+        to each line of the file
+    """
+    print 'patching file:' + file_to_patch
+    with open(file_to_patch, 'r') as infile:
+        file_data = infile.readlines()
+    with open(file_to_patch, 'w') as outfile:
+        for line in file_data:
+            _line = patch_line(line)
+            if _line:
+                line = _line
+            outfile.write(line)
+
 
 class package_ini(Command):
     """
@@ -44,28 +59,20 @@ class package_ini(Command):
 
     def initialize_options(self):
         self.packages = None
+        self.install_lib = None
         self.version = None
 
     def finalize_options(self):
         self.set_undefined_options(build_py.__name__,
                                    ('packages', 'packages'))
+        self.set_undefined_options(install.__name__,
+                                   ('install_lib', 'install_lib'))
         self.version = self.distribution.get_version()
 
     def visit(self, dirname, names):
         if basename(dirname) in self.packages:
             if 'package.ini' in names:
-                self.patch(join(dirname, 'package.ini'))
-
-    def patch(self, ini_file):
-        print 'patching file' + ini_file
-        with open(ini_file, 'r') as infile:
-            file_data = infile.readlines()
-        with open(ini_file, 'w') as outfile:
-            for line in file_data:
-                _line = self.patch_line(line)
-                if _line:
-                    line = _line
-                outfile.write(line)
+                patch_file(self.patch_line, join(dirname, 'package.ini'))
 
     def patch_line(self, line):
         """
@@ -76,7 +83,7 @@ class package_ini(Command):
                 \\((?P<command>.*)\.(?P<variable>.*)\\)""", line, re.VERBOSE)
         if not match:
             return line
-        print 'Replacing:' + line
+        print 'Replacing:' + line.replace('\n','')
         line = match.group('identifier')
         line += ' = '
         data = '(self).distribution.get_command_obj(\'' + \
@@ -84,7 +91,7 @@ class package_ini(Command):
                 match.group('variable')
         line += '\'' + str(eval(data)) + '\''
         line += '\n'
-        print 'With:' + line
+        print 'With:' + line.replace('\n','')
         return line
 
     def run(self):
@@ -93,7 +100,7 @@ class package_ini(Command):
             with variables from setup
         """
         walk(
-            self.distribution.get_command_obj(install.__name__).install_lib,
+            self.install_lib,
             package_ini.visit,
             self)
 
@@ -113,7 +120,8 @@ class install_manpage(install_data):
                                    ('build_base', 'build_base'),
                                   )
         for mantype in xrange(1, 9):
-            manpages = glob.glob('build/man/*.%i' % mantype)
+            manpages = glob(join(self.build_base, 'man') +
+                                    '/*.%i' % mantype)
             if manpages:
                 self.data_files += [('man%i' % mantype, manpages)]
 
@@ -139,33 +147,48 @@ class install(_install):
 
 
 class build_manpage(Command):
-    """Create a manpages from docbook source"""
+    """
+        Create a manpages from docbook source
+    """
 
     user_options = []
 
     def initialize_options(self):
-        self.build_base = None#location of build dir
+        self.build_base = None
+        self.data_dir = None
 
     def finalize_options(self):
         self.set_undefined_options('build',
                                    ('build_base', 'build_base'))
+        self.set_undefined_options('install_data',
+                                   ('install_dir', 'data_dir'))
 
     def man(self, input_file):
+        """Create a manpage from docbook source file"""
         source = join(
             dirname(__file__), input_file)
+        man_tmp_dir = join(self.build_base, 'man_tmp')
         man_dir = join(self.build_base, 'man')
-        if not exists(man_dir):
-            os.makedirs(man_dir)
+        for directory in [man_tmp_dir, man_dir]:
+            if not exists(directory):
+                os.makedirs(directory)
+        shutil.copy(source, man_tmp_dir)
+        patched_file = join(man_tmp_dir, basename(source))
+        patch_file(self.patch_line, patched_file)
         exe = subprocess.Popen(
-            ["docbook2man", abspath(source)], cwd=man_dir)
+            ["docbook2man", abspath(patched_file)], cwd=man_dir)
         exe.communicate()
         if exe.returncode != 0:
             raise DistutilsFileError(source)
 
+    def patch_line(self, line):
+        return line.replace('@XSD_PATH@',
+                    join(self.data_dir, 'configuration.xsd'))
+
     def run(self):
         doc_dir = join(
             dirname(__file__), 'doc')
-        for source in glob.glob(join(doc_dir, '*.xml')):
+        for source in glob(join(doc_dir, '*.xml')):
             self.man(source)
 
 
@@ -186,7 +209,6 @@ setup(
               build_manpage.__name__: build_manpage,
               install_manpage.__name__: install_manpage,
               install_data.__name__: install_data,
-              install_lib.__name__: install_lib,
               install.__name__: install,
               package_ini.__name__: package_ini},
     name=traydevice.__name__,
@@ -196,10 +218,10 @@ setup(
     packages=[traydevice.__name__],
     package_dir={traydevice.__name__: 'src/traydevice'},
     package_data={traydevice.__name__: ['package.ini']},
-    data_files=[('', glob.glob('data/*')),
+    data_files=[('', glob('data/*')),
                 ('', ['README.txt']),
                 ('', ['LICENSE.txt'])],
-    scripts=glob.glob('scripts/*'),
+    scripts=glob('scripts/*'),
     author='Martin Špelina',
     author_email='shpelda at seznam dot cz',
     license='GPL',

@@ -83,7 +83,7 @@ class package_ini(Command):
                 \\((?P<command>.*)\.(?P<variable>.*)\\)""", line, re.VERBOSE)
         if not match:
             return line
-        print 'Replacing:' + line.replace('\n','')
+        print 'Replacing:' + line.replace('\n', '')
         line = match.group('identifier')
         line += ' = '
         data = '(self).distribution.get_command_obj(\'' + \
@@ -91,7 +91,7 @@ class package_ini(Command):
                 match.group('variable')
         line += '\'' + str(eval(data)) + '\''
         line += '\n'
-        print 'With:' + line.replace('\n','')
+        print 'With:' + line.replace('\n', '')
         return line
 
     def run(self):
@@ -186,8 +186,7 @@ class build_manpage(Command):
                     join(self.data_dir, 'configuration.xsd'))
 
     def run(self):
-        doc_dir = join(
-            dirname(__file__), 'doc')
+        doc_dir = join(dirname(__file__), 'doc')
         for source in glob(join(doc_dir, '*.xml')):
             self.man(source)
 

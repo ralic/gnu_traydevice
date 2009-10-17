@@ -60,14 +60,14 @@ class DeviceGui(threading.Thread):
 
 
   def __create_trayicon_from_configuration(self,configuration, device):
-    available_icons = configuration.xpath('/trayicon/iconmap/icon/displayed_if')
+    available_icons = configuration.xpath('/traydevice/iconmap/icon/displayed_if')
     icon=None
     for i in available_icons:
       if device.get_property(i.get('ref')) == i.text:
         icon = i.getparent()
         break;
     if icon == None:
-      map = configuration.xpath('/trayicon/iconmap')[0]
+      map = configuration.xpath('/traydevice/iconmap')[0]
       return __create_trayicon(map.get('default_icon'), None)
     tooltip_configuration = icon.find('tooltip') 
     return self.__create_trayicon(icon.get('icon'), self.__create_tooltip(tooltip_configuration))
@@ -96,7 +96,7 @@ class DeviceGui(threading.Thread):
     """create a menu from configuration, 
        popup is accessible at /ui/traydevice
     """ 
-    menuitems = configuration.xpath('/trayicon/menuitem')
+    menuitems = configuration.xpath('/traydevice/menuitem')
     menu ='<ui><popup name="traydevice">'
     action_id=0
     for menuitem in menuitems:
@@ -110,7 +110,7 @@ class DeviceGui(threading.Thread):
   def __create_actions(self, configuration):
     """create a dict of actions and their enabling properties"""
     actions = dict()
-    menuitems = configuration.xpath('/trayicon/menuitem')
+    menuitems = configuration.xpath('/traydevice/menuitem')
     action_id=0
     for menuitem in menuitems:
       enabled = menuitem.find('enabled_if')#TODO more conditions

@@ -41,7 +41,8 @@ class Main:
     if configfile == None:
       configfile = default_config_file
       if not os.path.exists(default_config_file):
-        os.makedirs(os.path.dirname(default_config_file))
+        if not os.path.exists(os.path.dirname(default_config_file)):
+          os.makedirs(os.path.dirname(default_config_file))
         shutil.copyfile(get_resource('example-configuration.xml'), default_config_file)
 
     configuration = self.__open_configuration(configfile)

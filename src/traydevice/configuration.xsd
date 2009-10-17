@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2007  Martin Špelina <shpelda at seznam dot cz>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="trayicon"/>
+
+  <!--popup menu is a list of menu items-->
+  <xs:complexType name="T_trayicon">
+    <xs:sequence>
+      <xs:element name="iconmap" type="T_iconmap"/>
+      <xs:element name="menuitem" type="T_menuitem" maxOccurs="unbounded"/> 
+    </xs:sequence>
+  </xs:complexType>
+
+  <!--one entry in menu -->
+  <xs:complexType name="T_menuitem">
+    <xs:sequence>
+    <!-- command that gets invoked in case menu entry is pressed -->
+    <xs:element name="command" type="T_command" maxOccurs="unbounded"/>
+    <!-- condition, when this particular menu entry should be enabled -->
+    <xs:element name="enabled_if" type="T_hal_condition"/>
+    </xs:sequence>
+    <xs:attribute name="text" type="xs:string" use="required"/> <!--this is the text displayed on the menu entry, must be unique across whole popup-->
+    <xs:attribute name="icon" type="xs:string"/><!-- icon displayed on menu entry -->
+  </xs:complexType>
+
+  <!-- hal property value condition -->
+  <xs:complexType name="T_hal_condition">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="ref" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- command to be executed -->
+  <xs:complexType name="T_command">
+    <xs:sequence>
+      <xs:choice maxOccurs="unbounded">
+        <!-- raw string argument -->
+        <xs:element name="arg" type="xs:string"/>
+        <!-- reference to hal property -->
+        <xs:element name="ref" type="xs:string"/>
+      </xs:choice>
+      </xs:sequence>
+    <xs:attribute name="executable" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- mapping of hal conditions and icons-->
+  <xs:complexType name="T_iconmap">
+    <xs:sequence>
+      <xs:element name="icon" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <!-- what condition must be fullfilled to display this icon -->
+            <xs:element name="displayed_if" type="T_hal_condition"/>
+          </xs:sequence>
+          <!-- icon displayed on menu entry -->
+          <xs:attribute name="icon" type="xs:string" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="default_icon" type="xs:string" use="required"/><!-- icon displayed on systray  -->
+  </xs:complexType>
+
+  <xs:complexType name="T_tooltip">
+    <xs:attribute name="regex" type="xs:string" use="required"/>
+    <xs:attribute name="replacement" type="xs:string" use="required"/>
+    <xs:attribute name="ref" type="xs:string" use="required"/>
+  </xs:complexType>
+
+</xs:schema>

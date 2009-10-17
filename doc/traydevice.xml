@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!--
+  Copyright (C) 2007  Martin Špelina <shpelda at seznam dot cz>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+
+<refentry id="commands.traydevice">
+
+<refmeta>
+<refentrytitle>traydevice</refentrytitle>
+<manvolnum>1</manvolnum> <!-- 1 for commands -->
+</refmeta>
+
+<refnamediv>
+<refname>traydevice</refname>
+<refpurpose>Creates systray icon representing some device</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>/usr/bin/traydevice</command>
+<arg choice="opt">
+<option>options</option>
+</arg>
+<arg choice="opt" rep="norepeat">device_udi</arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>Display icon in system tray with a configurable right-click menu</para>
+</refsect1>
+
+<refsect1><title>Options</title>
+
+<variablelist>
+
+<varlistentry>
+  <term><option>-c FILE</option></term>
+  <term><option>--configfile=FILE</option></term>
+  <listitem>
+    <para>Use provided FILE instead of default configuration</para>
+  </listitem>
+</varlistentry>
+
+<varlistentry>
+  <term><option>-h</option></term>
+  <term><option>--help</option></term>
+  <listitem>
+    <para>Display short help and exit</para>
+  </listitem>
+</varlistentry>
+
+<varlistentry>
+  <term><option>-v</option></term>
+  <term><option>--version</option></term>
+  <listitem>
+    <para>Display traydevice version and exit</para>
+  </listitem>
+</varlistentry>
+
+
+</variablelist>
+
+</refsect1>
+
+<refsect1><title>Files</title>
+
+<variablelist>
+
+<varlistentry>
+  <term><filename id="default.xml">$HOME/.config/traydevice/default.xml</filename></term>
+  <listitem>
+    <para>Default configuration.</para>
+  </listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsect1>
+
+<refsect1><title>Configuration</title>
+<para>
+  See comments in default config file.
+</para>
+</refsect1>
+
+
+<refsect1><title>Bugs</title>
+<para>This is still alpha version, so no consistent error handling is implemented.</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<simplelist type="inline">
+  <member name="configuration.xsd" id="configuration.xsd">configuration.xsd</member>
+</simplelist>
+</para>
+</refsect1>
+
+
+</refentry>

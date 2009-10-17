@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2007  Martin Špelina <shpelda at seznam dot cz>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+
+<!--
+  Example configuration creating mount and umount entries in menu
+  icon entries might be either 
+  gtk.STOCKITEMS(http://www.pygtk.org/docs/pygtk/gtk-stock-items.html)
+  or .png filenames(not supported in this version)
+-->
+<trayicon>
+  <!-- 
+      a list of icons with conditions, when they should be displayed
+      first match is taken, when nothing matches, default_icon is used 
+  -->
+  <iconmap default_icon="gtk.STOCK_FLOPPY">
+    <icon icon="gtk.STOCK_HARDDISK">
+      <!-- 
+          this icon is used if property "access_control.type" of the device 
+          has value "removable-block" 
+      -->
+      <displayed_if ref="access_control.type">removable-block</displayed_if>
+      <tooltip regex="\(.*\)" replacement="\1" ref="info.product"/>
+    </icon>
+    <icon icon="gtk.STOCK_CDROM">
+      <displayed_if ref="access_control.type">cdrom</displayed_if>
+      <!--construct tooltip on the device icon-->
+      <!-- by applying regex on hal property-->
+      <tooltip regex="\(.*\)" replacement="\1" ref="info.product"/>
+    </icon>
+  </iconmap>
+  <menuitem icon="gtk.STOCK_ADD" text="mount">
+    <!-- execute command pmount-hal, passing it hal udi of managed device -->
+    <command executable="pmount-hal">
+      <ref>info.udi</ref>
+    </command>
+    <command executable="echo">
+      <arg>Just demonstrate usage of constant parameters</arg>
+      <ref>info.vendor</ref>
+      <arg>How they can be mixed with property references</arg>
+      <ref>info.product</ref>
+    </command>
+    <!--
+         allow clicking on this menuitem only if
+         device is not mounted already
+     -->
+    <enabled_if ref="volume.is_mounted">false</enabled_if>
+  </menuitem>
+  <!-- execute command pumount, passing it device node from hal property -->
+  <menuitem icon="gtk.STOCK_REMOVE" text="umount">
+    <command executable="pumount">
+      <ref>block.device</ref>
+    </command>
+    <!-- allow clicking on this menuitem only if device is mounted -->
+    <enabled_if ref="volume.is_mounted">true</enabled_if>
+  </menuitem>
+</trayicon>

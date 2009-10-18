@@ -19,10 +19,13 @@
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <xs:element name="trayicon"/>
+  <xs:element name="traydevice" type="T_traydevice"/>
 
-  <!--popup menu is a list of menu items-->
-  <xs:complexType name="T_trayicon">
+  <!--
+    traydevice configuration consists of configuration of traydevice icon itself
+    and configuration of popup menu
+  -->
+  <xs:complexType name="T_traydevice">
     <xs:sequence>
       <xs:element name="iconmap" type="T_iconmap"/>
       <xs:element name="menuitem" type="T_menuitem" maxOccurs="unbounded"/> 
@@ -71,6 +74,7 @@
           <xs:sequence>
             <!-- what condition must be fullfilled to display this icon -->
             <xs:element name="displayed_if" type="T_hal_condition"/>
+            <xs:element name="tooltip" type="T_tooltip"/>
           </xs:sequence>
           <!-- icon displayed on menu entry -->
           <xs:attribute name="icon" type="xs:string" use="required"/>

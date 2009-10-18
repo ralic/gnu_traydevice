@@ -23,7 +23,7 @@
   gtk.STOCKITEMS(http://www.pygtk.org/docs/pygtk/gtk-stock-items.html)
   or .png filenames(not supported in this version)
 -->
-<trayicon>
+<traydevice>
   <!-- 
       a list of icons with conditions, when they should be displayed
       first match is taken, when nothing matches, default_icon is used 
@@ -69,4 +69,4 @@
     <!-- allow clicking on this menuitem only if device is mounted -->
     <enabled_if ref="volume.is_mounted">true</enabled_if>
   </menuitem>
-</trayicon>
+</traydevice>

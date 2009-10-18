@@ -20,15 +20,13 @@
 from distutils.core import setup
 setup(name='traydevice',
   version='1.0',  
+  description='Lightweight, highly configurable single device systray representation',
   packages=['traydevice'],
   package_dir={'traydevice':'src/traydevice'},
-  package_data={'traydevice':['configuration.xsd, example-configuration.xml']},
-  data_files=['LICENSE.txt'],
+  package_data={'traydevice':['configuration.xsd','example-configuration.xml']},
   scripts=['scripts/traydevice'],
   author='Martin Špelina',
   author_email='shpelda at seznam dot cz' ,
   license='GPL',
-  platforms='any',
-  classifiers=[
-  ]
+  platforms='any'
   )

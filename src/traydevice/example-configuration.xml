@@ -33,13 +33,13 @@
           has value "removable-block" 
       -->
       <displayed_if ref="access_control.type">removable-block</displayed_if>
-      <tooltip regex="\(.*\)" replacement="\1" ref="info.product"/>
+      <tooltip regex="(.*)" replacement="\1" ref="info.product"/>
     </icon>
     <icon icon="gtk.STOCK_CDROM">
       <displayed_if ref="access_control.type">cdrom</displayed_if>
       <!--construct tooltip on the device icon-->
       <!-- by applying regex on hal property-->
-      <tooltip regex="\(.*\)" replacement="\1" ref="info.product"/>
+      <tooltip regex="(.*)" replacement="\1" ref="info.product"/>
     </icon>
   </iconmap>
   <menuitem icon="gtk.STOCK_ADD" text="mount">

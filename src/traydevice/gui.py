@@ -75,9 +75,9 @@ class DeviceGui(threading.Thread):
   def __create_tooltip(self, tooltip_configuration):
     if tooltip_configuration == None:
       return self.device.udi
-    return re.sub(tooltip_configuration.get('regex'),
-                  tooltip_configuration.get('replacement'),
-                  self.device.get_property(tooltip_configuration.get('ref')))
+    return re.sub('%s'%tooltip_configuration.get('regex'), 
+                  '%s'%tooltip_configuration.get('replacement'), 
+                  '%s'%self.device.get_property(tooltip_configuration.get('ref')))
 
   def __create_trayicon(self, icon_name, tooltip):
     stockitem = self.__get_gtk_stock_id(icon_name)

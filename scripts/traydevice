@@ -1,5 +1,14 @@
 #!/usr/bin/python
 
 from traydevice import main
+import signal
+import sys
 
-main.main()
+
+if __name__=="__main__":
+  signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+  main = main.Main(sys.argv)
+  main.start()
+
+

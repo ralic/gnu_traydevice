@@ -2,3 +2,4 @@ include LICENSE.txt
 include src/traydevice/*.xml
 include src/traydevice/*.xsd
 include doc/*
+include README.txt

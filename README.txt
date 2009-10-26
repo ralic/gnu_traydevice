@@ -11,7 +11,7 @@ of device you want to have in systray. Icon will appear with actions in
 right-click menu. If device is removed from system, program terminates.
 traydevice --help should tell you everything you need to know.
 
-Originally, traydevice was created to be used as interface for halevt.
+Originally, traydevice was created to be executed from halevt.
 (http://www.nongnu.org/halevt/). 
 Just execute "traydevice $hal.udi$ on insertion of the device.
 

@@ -21,6 +21,9 @@ from distutils.core import setup
 setup(name='traydevice',
   version='1.0',  
   description='Lightweight, highly configurable single device systray representation',
+  long_description="""Traydevice is a little desktop application displaying systray icon
+allowing you to conveniently execute custom commands 
+on the specified defice.""",
   packages=['traydevice'],
   package_dir={'traydevice':'src/traydevice'},
   package_data={'traydevice':['configuration.xsd','example-configuration.xml']},
@@ -28,5 +31,6 @@ setup(name='traydevice',
   author='Martin Špelina',
   author_email='shpelda at seznam dot cz' ,
   license='GPL',
-  platforms='any'
-  )
+  url='https://savannah.nongnu.org/projects/traydevice/',
+  platform='linux'
+)

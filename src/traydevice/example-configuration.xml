@@ -29,8 +29,8 @@
   <iconmap default_icon="gtk.STOCK_FLOPPY">
     <icon icon="gtk.STOCK_HARDDISK">
       <!-- 
-          this icon is used if property "access_control.type" of the device 
-          has value "removable-block" 
+          this icon is used if property "access_control.type" of the device
+          (or some of it's ancestors) has value "removable-block" 
       -->
       <displayed_if ref="access_control.type">removable-block</displayed_if>
       <tooltip regex="(.*)" replacement="\1" ref="info.product"/>
@@ -56,6 +56,7 @@
     <!--
          allow clicking on this menuitem only if
          device is not mounted already
+      (if it's property "volume.is_mounted" has value "false")
      -->
     <enabled_if ref="volume.is_mounted">false</enabled_if>
   </menuitem>
@@ -64,7 +65,10 @@
     <command executable="pumount">
       <ref>block.device</ref>
     </command>
-    <!-- allow clicking on this menuitem only if device is mounted -->
+    <!-- 
+      allow clicking on this menuitem only if device is mounted
+      (if it's property "volume.is_mounted" has value "true")
+    -->
     <enabled_if ref="volume.is_mounted">true</enabled_if>
   </menuitem>
 

@@ -19,6 +19,7 @@ Requirements
 ============
  - pygtk
  - python-lxml
+ - python-dbus
  - with default configuration it requires pmount for (u)mounting the device
 
 Installation

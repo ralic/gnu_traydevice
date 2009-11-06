@@ -37,7 +37,7 @@
 <arg choice="opt">
 <option>options</option>
 </arg>
-<arg choice="opt" rep="norepeat">device_udi</arg>
+<arg rep="norepeat">device_udi</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 

@@ -56,7 +56,7 @@ class manpage(Command):
  
 setup(cmdclass={'build': build, 'manpage':manpage},
   name='traydevice',
-  version='1.0',  
+  version='1.1',
   description='Lightweight, highly configurable single device systray representation',
   long_description="""Traydevice is a little desktop application displaying systray icon
 allowing you to conveniently execute custom commands 

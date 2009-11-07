@@ -42,7 +42,11 @@
 </refsynopsisdiv>
 
 <refsect1><title>Description</title>
-<para>Display icon in system tray with a configurable right-click menu</para>
+<para>
+Display device icon in system tray with a right-click menu with device commands.
+It is possible to configure icon itself, as well as commands in menu.
+Configuration is based on queriing HAL device properties.
+</para>
 </refsect1>
 
 <refsect1><title>Options</title>

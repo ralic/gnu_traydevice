@@ -20,6 +20,7 @@ Requirements
  - pygtk
  - python-lxml
  - python-dbus
+ - docbook2x (for manpages)
  - with default configuration it requires pmount for (u)mounting the device
 
 Installation

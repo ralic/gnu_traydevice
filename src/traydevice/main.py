@@ -47,7 +47,7 @@ class Main:
 
     configuration = self.__open_configuration(configfile)
     if len(args)!=1:
-      raise AssertionError('uid argument is required')
+      raise AssertionError('udi argument is required')
     self.device = device.Device(args[0], self)
     self.gui = gui.DeviceGui(configuration, self.device)
 

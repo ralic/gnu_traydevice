@@ -29,14 +29,14 @@
   <iconmap default_icon="gtk.STOCK_FLOPPY">
     <icon icon="gtk.STOCK_HARDDISK">
       <!-- 
-          this icon is used if property "access_control.type" of the device
-          (or some of it's ancestors) has value "removable-block" 
+          this icon is used if property "scsi.type" of the device
+          (or some of it's ancestors) has value "disk" 
       -->
-      <displayed_if ref="access_control.type">removable-block</displayed_if>
+      <displayed_if ref="scsi.type">disk</displayed_if>
       <tooltip regex="(.*)" replacement="\1" ref="info.product"/>
     </icon>
     <icon icon="gtk.STOCK_CDROM">
-      <displayed_if ref="access_control.type">cdrom</displayed_if>
+      <displayed_if ref="scsi.type">cdrom</displayed_if>
       <!--construct tooltip on the device icon-->
       <!-- by applying regex on hal property-->
       <tooltip regex="(.*)" replacement="\1" ref="info.product"/>

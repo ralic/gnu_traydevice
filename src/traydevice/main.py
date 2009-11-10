@@ -33,7 +33,7 @@ class Main:
   
   def __init__(self, argv):
     default_config_file=os.path.expanduser('~/.config/traydevice/default.xml')
-    parser = OptionParser(usage="%prog [options] udi", version="%prog 1.1")
+    parser = OptionParser(usage="%prog [options] udi", version="%prog 1.2")
     parser.add_option('-c', '--configfile', dest='configfile',
                   help='read configuration from FILE instead of default in %s'%default_config_file, metavar='FILE')
     (opts, args) = parser.parse_args()

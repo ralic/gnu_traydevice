@@ -68,7 +68,7 @@ class DeviceGui(threading.Thread):
         break;
     if icon == None:
       map = configuration.xpath('/traydevice/iconmap')[0]
-      return __create_trayicon(map.get('default_icon'), None)
+      return self.__create_trayicon(map.get('default_icon'), None)
     tooltip_configuration = icon.find('tooltip') 
     return self.__create_trayicon(icon.get('icon'), self.__create_tooltip(tooltip_configuration))
 

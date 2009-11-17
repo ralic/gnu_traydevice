@@ -21,6 +21,7 @@ from lxml import etree
 from optparse import OptionParser
 import os
 import shutil
+from xdg import BaseDirectory
  
 import device 
 import gui
@@ -32,7 +33,7 @@ def get_resource(resource):
 class Main:
   
   def __init__(self, argv):
-    default_config_file=os.path.expanduser('~/.config/traydevice/default.xml')
+    default_config_file=os.path.join(BaseDirectory.save_config_path('traydevice'), 'default.xml')
     parser = OptionParser(usage="%prog [options] udi", version="%prog 1.2")
     parser.add_option('-c', '--configfile', dest='configfile',
                   help='read configuration from FILE instead of default in %s'%default_config_file, metavar='FILE')
@@ -41,8 +42,6 @@ class Main:
     if configfile == None:
       configfile = default_config_file
       if not os.path.exists(default_config_file):
-        if not os.path.exists(os.path.dirname(default_config_file)):
-          os.makedirs(os.path.dirname(default_config_file))
         shutil.copyfile(get_resource('example-configuration.xml'), default_config_file)
 
     configuration = self.__open_configuration(configfile)

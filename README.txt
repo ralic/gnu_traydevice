@@ -21,6 +21,7 @@ Requirements
  - python-lxml
  - python-dbus
  - docbook2x (for manpages)
+ - pyxdg
  - with default configuration it requires pmount for (u)mounting the device
 
 Installation

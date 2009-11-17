@@ -32,11 +32,12 @@ def get_resource(resource):
 
 class Main:
   
-  def __init__(self, argv):
-    default_config_file=os.path.join(BaseDirectory.save_config_path('traydevice'), 'default.xml')
+  def __init__(self):
+    default_config_file=os.path.join(
+      BaseDirectory.save_config_path('traydevice'), 'default.xml')
     parser = OptionParser(usage="%prog [options] udi", version="%prog 1.2")
     parser.add_option('-c', '--configfile', dest='configfile',
-                  help='read configuration from FILE instead of default in %s'%default_config_file, metavar='FILE')
+      help='read configuration from FILE instead of default in %s'%default_config_file, metavar='FILE')
     (opts, args) = parser.parse_args()
     configfile = opts.configfile 
     if configfile == None:
@@ -92,6 +93,6 @@ class Main:
 if __name__=="__main__":
   signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-  main = Main(sys.argv)
+  main = Main()
   main.start()
 

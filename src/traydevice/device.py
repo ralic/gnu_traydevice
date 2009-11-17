@@ -52,7 +52,7 @@ class Device(threading.Thread):
     try:
       raw = self.__get_property(key)
       if type(raw) == dbus.Boolean:
-        if str(raw)=='1':
+        if raw:
           return 'true'
         else:
           return 'false'

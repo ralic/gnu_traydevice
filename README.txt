@@ -13,7 +13,7 @@ traydevice --help should tell you everything you need to know.
 
 Originally, traydevice was created to be executed from halevt.
 (http://www.nongnu.org/halevt/). 
-Just execute "traydevice $hal.udi$ on insertion of the device.
+Just execute "traydevice $hal.udi$" on insertion of the device.
 
 Requirements
 ============
@@ -47,11 +47,6 @@ at $HOME/.config/traydevice/default.xml.
 This file is well documented xml, that you should run quickly enoungh into.
 Basically, it assigns actions to entries in menu, allowing you to 
 reference various hal properties.
-
-Running
-=======
-Executing trydevice is fairly simple and traditional.
-traydevice --help should tell you everything you need to know.
 
 TODO
 ====

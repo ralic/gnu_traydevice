@@ -22,6 +22,7 @@ from distutils.errors import DistutilsFileError
 import subprocess
 import shutil
 import os
+import fileinput
 
 class build(_build):
   """Make build process call manpage command"""
@@ -45,14 +46,24 @@ class manpage(Command):
   def run(self):
     print self.build_base
     man_1_dir=os.path.join(self.build_base,'share/man/man1')
+    man_5_dir=os.path.join(self.build_base,'share/man/man5')
     manpage_1_source=os.path.join(
       os.path.dirname(__file__), 'doc/traydevice.xml')
+    manpage_5_source=os.path.join(
+      os.path.dirname(__file__), 'doc/traydevice-config.xml')
     shutil.rmtree(man_1_dir,ignore_errors=True)
+    shutil.rmtree(man_5_dir,ignore_errors=True)
     os.makedirs(man_1_dir)
+    os.makedirs(man_5_dir)
     exe = subprocess.Popen(["docbook2man",os.path.abspath(manpage_1_source)], cwd=man_1_dir)
-    result = exe.communicate()
+    exe.communicate()
     if exe.returncode != 0:
       raise DistutilsFileError(manpage_1_source)
+    exe = subprocess.Popen(["docbook2man",os.path.abspath(manpage_5_source)], cwd=man_5_dir)
+    exe.communicate()
+    if exe.returncode != 0:
+      raise DistutilsFileError(manpage_5_source)
+    
  
 setup(cmdclass={'build': build, 'manpage':manpage},
   name='traydevice',

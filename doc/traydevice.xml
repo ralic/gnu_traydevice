@@ -87,7 +87,7 @@ Configuration is based on queriing HAL device properties.
 <variablelist>
 
 <varlistentry>
-  <term><filename id="default.xml">$HOME/.config/traydevice/default.xml</filename></term>
+  <term><filename id="default.xml">$XDG_CONFIG_HOME/traydevice/default.xml</filename></term>
   <listitem>
     <para>Default configuration.</para>
   </listitem>
@@ -110,9 +110,11 @@ Configuration is based on queriing HAL device properties.
 
 <refsect1><title>See also</title>
 <para>
-<simplelist type="inline">
-  <member name="configuration.xsd" id="configuration.xsd">configuration.xsd</member>
-</simplelist>
+<citerefentry>
+                                <refentrytitle>traydevice</refentrytitle>
+                                <manvolnum>5</manvolnum>
+                        </citerefentry>
+
 </para>
 </refsect1>
 

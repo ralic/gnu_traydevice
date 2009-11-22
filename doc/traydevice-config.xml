@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!--
+  Copyright (C) 2009  Martin Špelina <shpelda at seznam dot cz>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+
+<refentry id="commands.traydevice">
+
+<refmeta>
+<refentrytitle>traydevice</refentrytitle>
+<manvolnum>5</manvolnum> 
+</refmeta>
+
+<refnamediv>
+<refname>traydevice</refname>
+<refpurpose>Traydevice configuration file</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>$XDG_CONFIG_HOME/traydevice/default.xml</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+Traydevice configuration file is a xml defined by @XSD_PATH@.
+This configuration sets up a menu, containing entries that get dynamically enabled or disabled using conditions quering <emphasis>hal</emphasis> device properties.
+For complete description of hal properties see  <ulink
+url="http://www.freedesktop.org/wiki/Software/hal">hal homepage</ulink>.
+</para>
+<para>
+Configuration consists of 
+    <emphasis>iconmap</emphasis> 
+    and multiple <emphasis>menuentry</emphasis>
+</para>
+<refsect2><title>iconmap</title>
+  <para>
+  Defines which icon should be displayed in systray. 
+  First matching icon is used.
+  It is constructed from several <emphasis>icon</emphasis> elements, 
+  containing <emphasis>displayed_if</emphasis> condition 
+  and a <emphasis>tooltip</emphasis> setting.
+  </para>
+  <para>
+  <emphasis>icon</emphasis> element has attribute 
+    <varlistentry>
+      <term>icon</term>
+      <listitem>
+        The reference to displayed image.
+        Accepted values for this attribute are either 
+        stockitems(prefixed by "gtk.") or absolute filenames of png icons.
+      </listitem>
+    </varlistentry>
+  </para>
+  <para>
+    <emphasis>displayed_if</emphasis> element is a generic condition. 
+    Conditions are explained in separate section of this manual.
+  </para>
+  <para>
+    <emphasis>tooltip</emphasis> element has attributes:
+    <varlistentry>
+      <term>regex</term>
+      <listitem>
+        Regular expression that is used to select part of hal property.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>replacement</term>
+      <listitem>
+        Text replacement for <emphasis>regex</emphasis> match.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>ref</term>
+      <listitem>
+        A reference to hal property whose value vill be used as input.
+      </listitem>
+    </varlistentry>
+  </para>
+  <para>
+  </para> 
+</refsect2>
+
+<refsect2><title>menuentry</title>
+<para>
+<emphasis>menuentry</emphasis> defines a single entry 
+in the traydevice right click menu. It is constructed from the <emphasis>enabled_if</emphasis> condition and several <emphasis>command</emphasis> elements.
+</para>
+  <para>
+    <emphasis>menuentry</emphasis> element has attributes:
+      <varlistentry>
+        <term>icon</term>
+        <listitem>
+          The reference to displayed image in menu.
+          Accepted values for this attribute are either 
+          stockitems(prefixed by "gtk.") or absolute filenames of png icons.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>text</term>
+        <listitem>
+          A text that should be displayed at this menu entry.
+        </listitem>
+      </varlistentry>
+    </para>
+  <para>
+    <emphasis>enabled_if</emphasis> element is a generic condition.
+    Conditions are explained in separate section of this manual. 
+  </para>
+  <para>
+    <emphasis>command</emphasis> element specifies a command to be executed.
+    It has single attribute:
+      <varlistentry>
+        <term>executable</term>
+        <listitem>
+          The name of the command to be executed.
+        </listitem>
+      </varlistentry>
+    And any number of parameters can be passed using nested elements:
+      <varlistentry>
+        <term><emphasis>arg</emphasis></term>
+        <listitem>
+          A constant argument.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis>ref</emphasis></term>
+        <listitem>
+          A reference to hal property.
+        </listitem>
+      </varlistentry>
+  </para>
+
+</refsect2>
+<refsect2><title>conditions</title>
+<para>
+Conditions are expressions evaluating whether particular hal properties have 
+expected values. Ordinary operators (NOT, OR, AND) can be used to construct complex conditions.
+</para>
+<para>
+Simple condition is created using <emphasis>match</emphasis> element 
+with attributes:
+  <varlistentry>
+    <term>key</term>
+    <listitem>
+      A reference to hal property.
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>string(optional)</term>
+    <listitem>
+      match a string property; 
+      for example &lt;match key="foo.bar" string="baz"&gt;  
+      will match only if 'foo.bar' is a string property 
+      assuming the value 'baz'. 
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>int(optional)</term>
+    <listitem>
+      match an integer property; 
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>bool(optional)</term>
+    <listitem>
+      match an boolean property; 
+    </listitem>
+  </varlistentry>
+This property matching is very same as is used in hal fdi configuration.
+</para>
+<para>
+Simple conditions can be joined together using logical operators - elements <emphasis>or,not,and</emphasis>. For example:
+<screen><![CDATA[
+<displayed_if>
+  <and>
+    <match property="foo.bar" int="5"/>
+    <or>
+      <match property="foo.balls" int="1"/>
+      <match property="foo.balls" int="2"/>
+    </or>
+    <not>
+      <match property="foo.frog" boolean="true"/>
+    </not>
+  </and>
+</displayed_if>]]></screen>
+Will display the icon if <quote>foo.bar</quote> has value 5, <quote>foo.bals</quote> has value 1 or 2 and <quote>foo.frog</quote> is not equal to true.
+</para>
+</refsect2>
+
+</refsect1>
+
+<refsect1><title>Bugs</title>
+<para>Using filenames as icons is not yet implemented.</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<simplelist type="inline">
+  <member name="configuration.xsd" id="configuration.xsd">@XSD_PATH@</member>
+</simplelist>
+</para>
+</refsect1>
+
+
+</refentry>

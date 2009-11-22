@@ -71,16 +71,16 @@ class Device(threading.Thread):
   def __complex_match(self, condition):
     if 'and' == condition.tag:
       for child in condition.getchildren():
-        if not __complex_match(child):
+        if not self.__complex_match(child):
           return False
       return True
     if 'or' == condition.tag:
       for child in condition.getchildren():
-        if __complex_match(child):
+        if self.__complex_match(child):
           return True
       return False
     if 'not' == condition.tag:
-      return not __complex_match(condition.getchildren()[0])
+      return not self.__complex_match(condition.getchildren()[0])
     if 'match' == condition.tag:
       return self.__elementary_match(condition) 
 

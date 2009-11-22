@@ -50,7 +50,6 @@ reference various hal properties.
 
 TODO
 ====
- - allow more complex hal property conditions 
  - non stockitem icons
  - consistent error handling
  - consistent logging

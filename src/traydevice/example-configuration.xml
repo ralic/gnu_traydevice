@@ -63,7 +63,7 @@
       (if it's property "volume.is_mounted" has value "false")
      -->
     <enabled_if>
-      <match key="volume.is_mounted" bool="false"/>
+      <not><match key="volume.is_mounted" bool="true"/></not>
     </enabled_if>
   </menuitem>
   <!-- execute command pumount, passing it device node from hal property -->
@@ -77,7 +77,7 @@
     -->
     <enabled_if>
       <match key="volume.is_mounted" bool="true"/>
-     </enabled_if>
+    </enabled_if>
   </menuitem>
 
 </traydevice>

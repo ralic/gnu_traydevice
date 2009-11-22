@@ -32,11 +32,15 @@
           this icon is used if property "scsi.type" of the device
           (or some of it's ancestors) has value "disk" 
       -->
-      <displayed_if ref="scsi.type">disk</displayed_if>
+      <displayed_if>
+        <match key="scsi.type" string="disk"/>
+      </displayed_if>
       <tooltip regex="(.*)" replacement="\1" ref="info.product"/>
     </icon>
     <icon icon="gtk.STOCK_CDROM">
-      <displayed_if ref="scsi.type">cdrom</displayed_if>
+      <displayed_if>
+        <match key="scsi.type" string="cdrom"/>
+      </displayed_if>
       <!--construct tooltip on the device icon-->
       <!-- by applying regex on hal property-->
       <tooltip regex="(.*)" replacement="\1" ref="info.product"/>
@@ -58,7 +62,9 @@
          device is not mounted already
       (if it's property "volume.is_mounted" has value "false")
      -->
-    <enabled_if ref="volume.is_mounted">false</enabled_if>
+    <enabled_if>
+      <match key="volume.is_mounted" bool="false"/>
+    </enabled_if>
   </menuitem>
   <!-- execute command pumount, passing it device node from hal property -->
   <menuitem icon="gtk.STOCK_REMOVE" text="umount">
@@ -69,7 +75,9 @@
       allow clicking on this menuitem only if device is mounted
       (if it's property "volume.is_mounted" has value "true")
     -->
-    <enabled_if ref="volume.is_mounted">true</enabled_if>
+    <enabled_if>
+      <match key="volume.is_mounted" bool="true"/>
+     </enabled_if>
   </menuitem>
 
 </traydevice>

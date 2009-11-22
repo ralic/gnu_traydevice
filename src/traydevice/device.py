@@ -62,6 +62,56 @@ class Device(threading.Thread):
       print 'Warning:property "%s" not found on device hierarchy'%key
       return None
 
+  def match(self, condition):
+    """ return True if this device matches condition defined by xsd:T_condition """
+    print 'match%s'%condition.tag
+    return self.__complex_match(condition.getchildren()[0])
+    pass
+  
+  def __complex_match(self, condition):
+    if 'and' == condition.tag:
+      for child in condition.getchildren():
+        if not __complex_match(child):
+          return False
+      return True
+    if 'or' == condition.tag:
+      for child in condition.getchildren():
+        if __complex_match(child):
+          return True
+      return False
+    if 'not' == condition.tag:
+      return not __complex_match(condition.getchildren()[0])
+    if 'match' == condition.tag:
+      return self.__elementary_match(condition) 
+
+  def __elementary_match(self, condition):
+    """ return True is this device matches condition definded by xsd:T_elementary_condition """
+    key = condition.get('key')
+    value = self.get_property(key)
+    for match in condition.items():
+      if match[0] == 'key':
+        continue
+      if match[0] == 'string':
+        if self.__string_match(value, match[1]):
+          return True
+        continue
+      if match[0] == 'int':
+        if self.__int_match(value, match[1]):
+          return True
+        continue
+      if match[0] == 'bool':
+        if self.__bool_match(value, match[1]):
+          return True
+        continue
+    pass
+
+  def __string_match(self, value, match):
+    return value == match
+  def __int_match(self, value, match):
+    return value == match
+  def __bool_match(self, value, match):
+    return value == match
+
   def run(self):
     """listens to hal event, killing the application when device is removed
         this has to be invoked in separate thread so that it won;t block gui thread
@@ -91,3 +141,5 @@ class Device(threading.Thread):
       parent_udi = hal_device.GetProperty('info.parent') 
       parent_object = self.__create_device(parent_udi)
       return self.__get_property(key, parent_object)
+
+ 

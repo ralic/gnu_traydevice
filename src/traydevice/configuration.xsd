@@ -38,19 +38,10 @@
     <!-- command that gets invoked in case menu entry is pressed -->
     <xs:element name="command" type="T_command" maxOccurs="unbounded"/>
     <!-- condition, when this particular menu entry should be enabled -->
-    <xs:element name="enabled_if" type="T_hal_condition"/>
+    <xs:element name="enabled_if" type="T_condition"/>
     </xs:sequence>
     <xs:attribute name="text" type="xs:string" use="required"/> <!--this is the text displayed on the menu entry, must be unique across whole popup-->
     <xs:attribute name="icon" type="xs:string"/><!-- icon displayed on menu entry -->
-  </xs:complexType>
-
-  <!-- hal property value condition -->
-  <xs:complexType name="T_hal_condition">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="ref" type="xs:string" use="required"/>
-      </xs:extension>
-    </xs:simpleContent>
   </xs:complexType>
 
   <!-- command to be executed -->
@@ -73,7 +64,7 @@
         <xs:complexType>
           <xs:sequence>
             <!-- what condition must be fullfilled to display this icon -->
-            <xs:element name="displayed_if" type="T_hal_condition"/>
+            <xs:element name="displayed_if" type="T_condition"/>
             <xs:element name="tooltip" type="T_tooltip"/>
           </xs:sequence>
           <!-- icon displayed on menu entry -->
@@ -89,5 +80,54 @@
     <xs:attribute name="replacement" type="xs:string" use="required"/>
     <xs:attribute name="ref" type="xs:string" use="required"/>
   </xs:complexType>
+  
+  <xs:complexType name="T_conjunction">
+    <xs:sequence>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element name="and" type="T_conjunction"/>
+        <xs:element name="or" type="T_disjunction"/>
+        <xs:element name="not" type="T_negation"/>
+        <xs:element name="match" type="T_elementary_condition"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="T_disjunction">
+    <xs:sequence>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element name="and" type="T_conjunction"/>
+        <xs:element name="or" type="T_disjunction"/>
+        <xs:element name="not" type="T_negation"/>
+        <xs:element name="match" type="T_elementary_condition"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="T_negation">
+    <xs:choice>
+      <xs:element name="and" type="T_conjunction"/>
+      <xs:element name="or" type="T_disjunction"/>
+      <xs:element name="not" type="T_negation"/>
+      <xs:element name="match" type="T_elementary_condition"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="T_condition">
+    <xs:choice>
+      <xs:element name="and" type="T_conjunction"/>
+      <xs:element name="or" type="T_disjunction"/>
+      <xs:element name="not" type="T_negation"/>
+      <xs:element name="match" type="T_elementary_condition"/>
+    </xs:choice>  
+  </xs:complexType>
+
+  <!--TODO: support for all <match> atributes from hal specification http://www.marcuscom.com/hal-spec/hal-spec.html#fdi-matching -->
+  <xs:complexType name="T_elementary_condition">
+      <xs:attribute name="key" type="xs:string" use="required"/><!--hal property key-->
+      <xs:attribute name="string" type="xs:string" use="optional"/><!-- match a string property-->
+      <xs:attribute name="int" type="xs:int" use="optional"/><!--int - match an integer property-->
+      <xs:attribute name="bool" type="xs:boolean" use="optional"/><!--int - match a boolean property-->
+  </xs:complexType>
+
 
 </xs:schema>

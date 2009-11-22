@@ -28,7 +28,7 @@ class DeviceGui(threading.Thread):
     threading.Thread.__init__(self)
     self.device = device 
     self.actions = self.__create_actions(configuration)
-    self.trayicon = self.__create_trayicon_from_configuration(configuration, device)
+    self.trayicon = self.__create_trayicon_from_configuration(configuration)
     uiManager = gtk.UIManager()
     uiManager.add_ui_from_string( self.__create_widget_description(configuration) )
     popup_actions = gtk.ActionGroup('popup_actions')
@@ -48,9 +48,7 @@ class DeviceGui(threading.Thread):
 
   def __setup_sensitive(self):
     for a in self.actions:
-      property_value = self.device.get_property(self.actions[a][0])
-      expected=self.actions[a][1]
-      a.set_property('sensitive',property_value == expected)
+      a.set_property('sensitive',self.device.match(self.actions[a][0]))
     
   def run(self):
     gtk.main()  
@@ -59,11 +57,11 @@ class DeviceGui(threading.Thread):
     gtk.main_quit()
 
 
-  def __create_trayicon_from_configuration(self,configuration, device):
+  def __create_trayicon_from_configuration(self,configuration):
     available_icons = configuration.xpath('/traydevice/iconmap/icon/displayed_if')
     icon=None
     for i in available_icons:
-      if device.get_property(i.get('ref')) == i.text:
+      if self.device.match(i):
         icon = i.getparent()
         break;
     if icon == None:
@@ -113,10 +111,8 @@ class DeviceGui(threading.Thread):
     menuitems = configuration.xpath('/traydevice/menuitem')
     action_id=0
     for menuitem in menuitems:
-      enabled = menuitem.find('enabled_if')#TODO more conditions
-      enabled_property=enabled.get('ref')
-      enabled_value=enabled.text
       action_label=menuitem.get('text')
+      enabled_if = menuitem.find('enabled_if')
       action = gtk.Action(
         action_id,action_label,None,self.__get_gtk_stock_id(menuitem.get('icon')))
       action_id += 1
@@ -124,6 +120,6 @@ class DeviceGui(threading.Thread):
       for c in menuitem.findall('command'):
         commands.append(c) 
       action.connect('activate', self.run_action, commands)
-      actions[action]=[enabled_property, enabled_value]
+      actions[action]=[enabled_if]
     return actions
 

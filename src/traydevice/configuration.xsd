@@ -21,67 +21,105 @@
 
   <xs:element name="traydevice" type="T_traydevice"/>
 
-  <!-- 
-       traydevice configuration consists of configuration of tray icon itself,
-       and popup menu description 
-  -->
   <xs:complexType name="T_traydevice">
+    <xs:annotation>
+      <xs:documentation>
+       Master configuration type.
+       consists of configuration of tray icon itself,
+       and popup menu description 
+      </xs:documentation>
+    </xs:annotation>
     <xs:sequence>
       <xs:element name="iconmap" type="T_iconmap"/>
       <xs:element name="menuitem" type="T_menuitem" maxOccurs="unbounded"/> 
     </xs:sequence>
   </xs:complexType>
 
-  <!--one entry in menu -->
   <xs:complexType name="T_menuitem">
+    <xs:annotation>
+      <xs:documentation>
+        One entry in menu. 
+        Defines command to be executed when user clicks on menu entry 
+        and a condition when is this menu entry enabled.
+        Attribute "text" defines text displayed on menuitem.
+        Attribute "icon" defines icon image displayed on menuitem.
+      </xs:documentation>
+    </xs:annotation>
     <xs:sequence>
-    <!-- command that gets invoked in case menu entry is pressed -->
-    <xs:element name="command" type="T_command" maxOccurs="unbounded"/>
-    <!-- condition, when this particular menu entry should be enabled -->
-    <xs:element name="enabled_if" type="T_condition"/>
+      <xs:element name="command" type="T_command" maxOccurs="unbounded"/>
+      <xs:element name="enabled_if" type="T_condition"/>
     </xs:sequence>
-    <xs:attribute name="text" type="xs:string" use="required"/> <!--this is the text displayed on the menu entry, must be unique across whole popup-->
-    <xs:attribute name="icon" type="xs:string"/><!-- icon displayed on menu entry -->
+    <xs:attribute name="text" type="xs:string" use="required"/> 
+    <xs:attribute name="icon" type="xs:string"/>
   </xs:complexType>
 
-  <!-- command to be executed -->
   <xs:complexType name="T_command">
+    <xs:annotation>
+      <xs:documentation>
+        Defines command to be executed and it's parameters.
+        It is possible to pass either raw arguments, using nested element "arg" or
+        hal-property references, using nested element "ref"
+      </xs:documentation>
+    </xs:annotation>
     <xs:sequence>
       <xs:choice maxOccurs="unbounded">
-        <!-- raw string argument -->
         <xs:element name="arg" type="xs:string"/>
-        <!-- reference to hal property -->
         <xs:element name="ref" type="xs:string"/>
       </xs:choice>
       </xs:sequence>
     <xs:attribute name="executable" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <!-- mapping of hal conditions and icons-->
-  <xs:complexType name="T_iconmap">
-    <xs:sequence>
-      <xs:element name="icon" maxOccurs="unbounded">
-        <xs:complexType>
-          <xs:sequence>
-            <!-- what condition must be fullfilled to display this icon -->
-            <xs:element name="displayed_if" type="T_condition"/>
-            <xs:element name="tooltip" type="T_tooltip"/>
-          </xs:sequence>
-          <!-- icon displayed on menu entry -->
-          <xs:attribute name="icon" type="xs:string" use="required"/>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="default_icon" type="xs:string" use="required"/><!-- icon displayed on systray  -->
+  <xs:complexType name="T_trayicon_configuration">
+      <xs:annotation>
+        <xs:documentation>
+          Configuration of a systray icon.
+          This will be used if nested property "displayed_if" is fullfilled.
+          Displayed icon has a tooltip assigned, defined by nested "tooltip" element.
+          Attribute "icon" defines icon image displayed in systray.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+        <xs:element name="displayed_if" type="T_condition"/>
+        <xs:element name="tooltip" type="T_tooltip"/>
+      </xs:sequence>
+      <xs:attribute name="icon" type="xs:string" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="T_iconmap">
+    <xs:annotation>
+      <xs:documentation>
+        Defines which icon will be displayed in systray.
+        Attribute "default_icon" defines a icon image that will be used if no nested icon
+        configurations match.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="icon"  type="T_trayicon_configuration" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="default_icon" type="xs:string" use="required"/>
+  </xs:complexType>
+
+
   <xs:complexType name="T_tooltip">
+    <xs:annotation>
+      <xs:documentation>
+        Defines tooltip construction from hal property.
+        tooltip text is constructed by applying regular expression "regex" and
+        it's replacement "replacement" to hal-property referenced by "ref".
+      </xs:documentation>
+    </xs:annotation>
     <xs:attribute name="regex" type="xs:string" use="required"/>
     <xs:attribute name="replacement" type="xs:string" use="required"/>
     <xs:attribute name="ref" type="xs:string" use="required"/>
   </xs:complexType>
   
   <xs:complexType name="T_conjunction">
+    <xs:annotation>
+      <xs:documentation>
+        A simple AND logical operator.
+      </xs:documentation>
+    </xs:annotation>
     <xs:sequence>
       <xs:choice maxOccurs="unbounded">
         <xs:element name="and" type="T_conjunction"/>
@@ -93,6 +131,11 @@
   </xs:complexType>
   
   <xs:complexType name="T_disjunction">
+    <xs:annotation>
+      <xs:documentation>
+        A simple OR logical operator.
+      </xs:documentation>
+    </xs:annotation>
     <xs:sequence>
       <xs:choice maxOccurs="unbounded">
         <xs:element name="and" type="T_conjunction"/>
@@ -104,6 +147,11 @@
   </xs:complexType>
 
   <xs:complexType name="T_negation">
+    <xs:annotation>
+      <xs:documentation>
+        A simple NOT logical operator.
+      </xs:documentation>
+    </xs:annotation>
     <xs:choice>
       <xs:element name="and" type="T_conjunction"/>
       <xs:element name="or" type="T_disjunction"/>
@@ -113,6 +161,11 @@
   </xs:complexType>
 
   <xs:complexType name="T_condition">
+    <xs:annotation>
+      <xs:documentation>
+        A generic condition.
+      </xs:documentation>
+    </xs:annotation>
     <xs:choice>
       <xs:element name="and" type="T_conjunction"/>
       <xs:element name="or" type="T_disjunction"/>
@@ -123,11 +176,39 @@
 
   <!--TODO: support for all <match> atributes from hal specification http://www.marcuscom.com/hal-spec/hal-spec.html#fdi-matching -->
   <xs:complexType name="T_elementary_condition">
-      <xs:attribute name="key" type="xs:string" use="required"/><!--hal property key-->
-      <xs:attribute name="string" type="xs:string" use="optional"/><!-- match a string property-->
-      <xs:attribute name="int" type="xs:int" use="optional"/><!--int - match an integer property-->
-      <xs:attribute name="bool" type="xs:boolean" use="optional"/><!--int - match a boolean property-->
+    <xs:annotation>
+      <xs:documentation>
+        Single hal-property matching.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="key" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          hal-property key.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="string" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Matching of string property.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="int" type="xs:int" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Matching of integer property.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="bool" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Matching of boolean property.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
-
 
 </xs:schema>

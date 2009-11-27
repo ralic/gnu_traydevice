@@ -6,9 +6,4 @@ import sys
 
 
 if __name__=="__main__":
-  signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-  main = main.Main(sys.argv)
-  main.start()
-
-
+  main.main()

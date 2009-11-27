@@ -31,7 +31,6 @@ def get_resource(resource):
     """retrieve files from sources"""
     return os.path.join(os.path.dirname(__file__), resource)
 
-
 class Main:
 
     def __init__(self):
@@ -92,8 +91,12 @@ class Main:
         return root
 
 
-if __name__ == "__main__":
+def main():
+    """Start traydevice"""
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-
     main = Main()
     main.start()
+
+if __name__ == "__main__":
+    main()
+

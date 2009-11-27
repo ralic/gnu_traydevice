@@ -28,25 +28,36 @@ import gui
 
 
 def get_resource(resource):
-    """retrieve files from sources"""
+    """
+        Retrieve files from sources
+    """
     return os.path.join(os.path.dirname(__file__), resource)
+
+
+def get_config_file(filename):
+    """
+        Retrieve path to configuration file identified by
+        filename. If file does not exist at location defined by
+        XDG_CONFIG_HOME, it will be created with default values.
+    """
+    xdg = os.path.join(
+        BaseDirectory.save_config_path('traydevice'), filename)
+    if not os.path.exists(xdg):
+        shutil.copyfile(get_resource(filename), xdg)
+    return xdg
+
 
 class Main:
 
     def __init__(self):
-        default_config_file = os.path.join(
-            BaseDirectory.save_config_path('traydevice'), 'default.xml')
+        configfile = get_config_file('default.xml')
         parser = OptionParser(usage="%prog [options] udi", version="%prog 1.2")
         parser.add_option('-c', '--configfile', dest='configfile',
             help='read configuration from FILE instead of default in %s' %
-                default_config_file, metavar='FILE')
+                configfile, metavar='FILE')
         (opts, args) = parser.parse_args()
-        configfile = opts.configfile
-        if configfile == None:
-            configfile = default_config_file
-            if not os.path.exists(default_config_file):
-                shutil.copyfile(get_resource('example-configuration.xml'),
-                    default_config_file)
+        if opts.configfile != None:
+            configfile = opts.configfile
 
         configuration = self.__open_configuration(configfile)
         if len(args) != 1:
@@ -99,4 +110,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -22,6 +22,8 @@ from optparse import OptionParser
 import os
 import shutil
 from xdg import BaseDirectory
+import logging
+import logging.config
 
 import device
 import gui
@@ -50,6 +52,9 @@ def get_config_file(filename):
 class Main:
 
     def __init__(self):
+        """
+            Initialize traydevice, parse command line, read configuration
+        """
         configfile = get_config_file('default.xml')
         parser = OptionParser(usage="%prog [options] udi", version="%prog 1.2")
         parser.add_option('-c', '--configfile', dest='configfile',
@@ -103,10 +108,17 @@ class Main:
 
 
 def main():
-    """Start traydevice"""
+    """
+        Start traydevice
+    """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    main = Main()
-    main.start()
+    logging.config.fileConfig(get_config_file('logging.conf'))
+    try:
+        main = Main()
+        main.start()
+    except Exception as e:
+        logging.getLogger('main').error(e)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

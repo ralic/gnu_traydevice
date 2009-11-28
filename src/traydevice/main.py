@@ -113,12 +113,7 @@ def main():
     """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     logging.config.fileConfig(get_config_file('logging.conf'))
-    try:
-        main = Main()
-        main.start()
-    except Exception as e:
-        logging.getLogger('main').error(e)
-        sys.exit(1)
-
+    main = Main()
+    main.start()
 if __name__ == "__main__":
     main()

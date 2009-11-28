@@ -16,22 +16,34 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 import subprocess
+import logging
 
 
-def __construct_args(command_configuration, device):
-    args = [command_configuration.get('executable')]
-    for arg in command_configuration.iterchildren():
-        if arg.tag == 'arg':
-            args.append(arg.text)
-        if arg.tag == 'ref':
-            args.append(device.get_property(arg.text))
-    return args
+class Command:
+    """
+        Class wrapping one command to be executed
+    """
 
+    def __init__(self, command_configuration, device):
+        """
+            Command initialization
+        """
+        self.logger = logging.getLogger('Command')
+        self.device = device
+        self.configuration = command_configuration
 
-def execute(command_configuration, device):
-    command = subprocess.Popen(
-      __construct_args(command_configuration, device),
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE)
-    print command.communicate()
-    print 'result:%s' % command.returncode
+    def execute(self):
+        """
+            Invoke configured command
+        """
+        args = [self.configuration.get('executable')]
+        for arg in self.configuration.iterchildren():
+            if arg.tag == 'arg':
+                args.append(arg.text)
+            if arg.tag == 'ref':
+                args.append(self.device.get_property(arg.text))
+
+        command = subprocess.Popen(args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        self.logger.debug(command.communicate())

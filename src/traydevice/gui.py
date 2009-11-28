@@ -20,7 +20,7 @@ pygtk.require('2.0')
 import gtk
 import threading
 import re
-import executor
+from executor import Command
 
 
 class DeviceGui(threading.Thread):
@@ -46,7 +46,7 @@ class DeviceGui(threading.Thread):
 
     def run_action(self, action, commands):
         for c in commands:
-            executor.execute(c, self.device)
+            c.execute()
 
     def __popup_menu(self, status_icon, button, activate_time, menu):
         self.__setup_sensitive()
@@ -136,7 +136,7 @@ class DeviceGui(threading.Thread):
             action_id += 1
             commands = []
             for c in menuitem.findall('command'):
-                commands.append(c)
+                commands.append(Command(c, self.device))
             action.connect('activate', self.run_action, commands)
             actions[action] = [enabled_if]
         return actions

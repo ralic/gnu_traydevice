@@ -28,6 +28,7 @@ import logging.config
 import device
 import gui
 
+VERSION='1.2'
 
 def get_resource(resource):
     """
@@ -56,7 +57,8 @@ class Main:
             Initialize traydevice, parse command line, read configuration
         """
         configfile = get_config_file('default.xml')
-        parser = OptionParser(usage="%prog [options] udi", version="%prog 1.2")
+        parser = OptionParser(usage="%prog [options] udi", 
+        version="%prog "+VERSION)
         parser.add_option('-c', '--configfile', dest='configfile',
             help='read configuration from FILE instead of default in %s' %
                 configfile, metavar='FILE')
@@ -133,5 +135,6 @@ def main():
     logging.config.fileConfig(get_config_file('logging.conf'))
     main = Main()
     main.start()
+
 if __name__ == "__main__":
     main()

@@ -70,10 +70,14 @@ class manpage(Command):
         if exe.returncode != 0:
             raise DistutilsFileError(manpage_5_source)
 
+import sys
+import os.path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+from traydevice import main
 
 setup(cmdclass={'build': build, 'manpage': manpage},
     name='traydevice',
-    version='1.2',
+    version=main.VERSION,
     description="""Lightweight,
         highly configurable single device systray representation""",
     long_description="""Traydevice is a little desktop application

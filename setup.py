@@ -73,11 +73,11 @@ class manpage(Command):
 import sys
 import os.path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
-from traydevice import main
+import traydevice
 
 setup(cmdclass={'build': build, 'manpage': manpage},
     name='traydevice',
-    version=main.VERSION,
+    version=traydevice.__version__,
     description="""Lightweight,
         highly configurable single device systray representation""",
     long_description="""Traydevice is a little desktop application

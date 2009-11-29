@@ -20,10 +20,13 @@ from dbus.mainloop.glib import DBusGMainLoop
 from dbus.mainloop.glib import threads_init
 import dbus
 import gobject
+import logging
 
 
 class Device(threading.Thread):
-    """Wraps the device itself"""
+    """
+        Wraps hal connection to device 
+    """
 
     def __init__(self, udi, device_removed_listener):
         """
@@ -35,6 +38,7 @@ class Device(threading.Thread):
         threading.Thread.__init__(self)
         self.device_removed_listener = device_removed_listener
         self.udi = udi
+        self.logger = logging.getLogger('Device')
 
         #setup a connection to dbus & hal
         DBusGMainLoop(set_as_default=True)
@@ -50,7 +54,9 @@ class Device(threading.Thread):
         self.loop = gobject.MainLoop()
 
     def get_property(self, key):
-        """return actual value of device property"""
+        """
+            Return actual value of device property
+        """
         try:
             raw = self.__get_property(key)
             if type(raw) == dbus.Boolean:
@@ -61,14 +67,14 @@ class Device(threading.Thread):
             else:
                 return str(raw)
         except dbus.exceptions.DBusException:
-            print 'Warning:property "%s" not found on device hierarchy' % key
+            self.logger.warning('property "%s" not found on device hierarchy' % key)
             return None
 
     def match(self, condition):
-        """ return True if this device matches condition defined by
+        """
+            Return True if this device matches condition defined by
             xsd:T_condition
         """
-        print 'match %s' % condition.tag
         return self.__complex_match(condition.getchildren()[0])
         pass
 
@@ -121,7 +127,8 @@ class Device(threading.Thread):
         return value == match
 
     def run(self):
-        """listens to hal event, killing the application when device is removed
+        """
+           listens to hal event, killing the application when device is removed
            this has to be invoked in separate thread so that it won;t block
            gui thread
         """
@@ -132,7 +139,8 @@ class Device(threading.Thread):
 
     def __device_removed(self, cause):
             if self.udi == cause:
-                print 'device %s has been removed from system' % self.udi
+                self.logger.debug(
+                    'device %s has been removed from system' % self.udi)
                 self.device_removed_listener.device_removed()
 
     def __create_device(self, udi):
@@ -141,8 +149,9 @@ class Device(threading.Thread):
               'org.freedesktop.Hal.Device')
 
     def __get_property(self, key, hal_device=None):
-        """ recursively read value of hal property of given name
-            reads it from paren udi if it is not accessible from actual one
+        """
+            Recursively read value of hal property of given name.
+            Reads it from parent udi if it is not accessible from actual one
         """
         if hal_device == None:
             hal_device = self.hal_device

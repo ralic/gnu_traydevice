@@ -24,7 +24,9 @@ from executor import Command
 
 
 class DeviceGui(threading.Thread):
-    """Wraps user presentation of device"""
+    """
+        User presentation of device
+    """
 
     def __init__(self, configuration, device):
         threading.Thread.__init__(self)
@@ -45,6 +47,9 @@ class DeviceGui(threading.Thread):
         self.__setup_sensitive()
 
     def run_action(self, action, commands):
+        """
+            Menu callback
+        """
         for c in commands:
             c.execute()
 
@@ -58,16 +63,28 @@ class DeviceGui(threading.Thread):
           status_icon)
 
     def __setup_sensitive(self):
+        """
+            Enable/disable menu entries based on configuration
+        """
         for a in self.actions:
             a.set_property('sensitive', self.device.match(self.actions[a][0]))
 
     def run(self):
+        """
+            Start being displayed
+        """
         gtk.main()
 
     def stop(self):
+        """
+            Stop being displayed
+        """
         gtk.main_quit()
 
     def __create_trayicon_from_configuration(self, configuration):
+        """
+            Create a systray icon from T_iconmap
+        """
         available_icons = \
             configuration.xpath('/traydevice/iconmap/icon/displayed_if')
         icon = None
@@ -106,8 +123,9 @@ class DeviceGui(threading.Thread):
             raise AssertionError(' %s stockitem not found' % icon_name)
 
     def __create_widget_description(self, configuration):
-        """create a menu from configuration,
-             popup is accessible at /ui/traydevice
+        """
+            Create gtk popup menu from configuration,
+            popup is accessible at /ui/traydevice
         """
         menuitems = configuration.xpath('/traydevice/menuitem')
         menu = '<ui><popup name = "traydevice">'
@@ -122,7 +140,10 @@ class DeviceGui(threading.Thread):
         return menu
 
     def __create_actions(self, configuration):
-        """create a dict of actions and their enabling properties"""
+        """
+            Create a dictionary of menu actions and 
+            commands assigned to them
+        """
         actions = dict()
         menuitems = configuration.xpath('/traydevice/menuitem')
         action_id = 0

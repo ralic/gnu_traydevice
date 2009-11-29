@@ -119,8 +119,8 @@ class DeviceGui(threading.Thread):
     def __get_gtk_stock_id(self, icon_name):
         try:
             return eval(icon_name)
-        except NameError:
-            raise AssertionError(' %s stockitem not found' % icon_name)
+        except :
+            raise AssertionError('\'%s\' stockitem not found' % icon_name)
 
     def __create_widget_description(self, configuration):
         """

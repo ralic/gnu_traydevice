@@ -44,12 +44,10 @@ Configuration
 =============
 When ran for the first time, it creates a default configuration file
 at $HOME/.config/traydevice/default.xml.
-This file is well documented xml, that you should run quickly enoungh into.
+This file is well documented xml, that you should run quickly enough into.
 Basically, it assigns actions to entries in menu, allowing you to 
 reference various hal properties.
 
 TODO
 ====
  - non stockitem icons
- - consistent error handling
- - consistent logging

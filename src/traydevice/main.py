@@ -64,11 +64,29 @@ class Main:
         if opts.configfile != None:
             configfile = opts.configfile
 
-        configuration = self.__open_configuration(configfile)
         if len(args) != 1:
-            raise AssertionError('udi argument is required')
-        self.device = device.Device(args[0], self)
-        self.gui = gui.DeviceGui(configuration, self.device)
+            logging.getLogger('Main').error('udi argument is required')
+            sys.exit(1)
+        try:
+            configuration = self.__open_configuration(configfile)
+        except Exception as e:
+            logging.getLogger('Main').error(
+                'Cannot read configuration file \'%s\' (%s)'
+                %(configfile, e))
+            sys.exit(1)
+        try:            
+            self.device = device.Device(args[0], self)
+        except Exception as e:
+            logging.getLogger('Main').error(
+                'Cannot access hal device \'%s\' (%s)'
+                %(args[0], e)) 
+            sys.exit(1)
+        try:
+            self.gui = gui.DeviceGui(configuration, self.device)
+        except Exception as e:
+            logging.getLogger('Main').error(
+                'Gui construction failed. (%s)' % e) 
+            sys.exit(1)
 
     def start(self):
         """

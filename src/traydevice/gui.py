@@ -20,7 +20,7 @@ pygtk.require('2.0')
 import gtk
 import threading
 import re
-from executor import Command
+from command import Command
 
 
 class DeviceGui(threading.Thread):

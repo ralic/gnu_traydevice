@@ -28,7 +28,7 @@ import logging.config
 import device
 import gui
 
-VERSION='1.3'
+VERSION='1.4'
 
 def get_resource(resource):
     """

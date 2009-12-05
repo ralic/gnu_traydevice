@@ -1,5 +1,6 @@
 include LICENSE.txt
 include src/traydevice/*.xml
 include src/traydevice/*.xsd
+include src/traydevice/*.conf
 include doc/*
 include README.txt

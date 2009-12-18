@@ -2,7 +2,7 @@ Traydevice
 ==========
 Traydevice is a little desktop application displaying systray icon
 allowing you to conveniently execute custom commands 
-on the specified defice.
+on the specified device.
 
 Usage
 =====

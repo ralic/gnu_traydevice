@@ -24,15 +24,15 @@ import shutil
 import os
 import fileinput
 
-
 class build(_build):
     """Make build process call manpage command"""
 
-    sub_commands = _build.sub_commands + [('manpage', None)]
+    sub_commands = _build.sub_commands + [
+        ('manpage', None)
+    ]
 
     def __init__(self, dist):
         _build.__init__(self, dist)
-
 
 class manpage(Command):
     """Create a manpages from docbook source"""
@@ -74,15 +74,15 @@ import sys
 import os.path
 sys.path.insert(0,os.path.join(os.path.dirname(__file__), 'src'))
 import traydevice
+import pydoc
+
+docs=pydoc.splitdoc(traydevice.__doc__)
 
 setup(cmdclass={'build': build, 'manpage': manpage},
     name='traydevice',
     version=traydevice.__version__,
-    description="""Lightweight,
-        highly configurable single device systray representation""",
-    long_description="""Traydevice is a little desktop application
-        displaying systray icon allowing you to conveniently execute
-        custom commands on the specified defice.""",
+    description=docs[0],
+    long_description=docs[1],
     packages=['traydevice'],
     package_dir={'traydevice': 'src/traydevice'},
     package_data={'traydevice':

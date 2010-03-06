@@ -24,10 +24,11 @@ import shutil
 from xdg import BaseDirectory
 import logging
 import logging.config
-#fully qualified so that package data(version) is available
+
 import device
 import gui
-from traydevice import __version__
+
+VERSION='1.4'
 
 def get_resource(resource):
     """
@@ -57,7 +58,7 @@ class Main:
         """
         configfile = get_config_file('default.xml')
         parser = OptionParser(usage="%prog [options] udi", 
-        version="%prog "+__version__)
+        version="%prog "+VERSION)
         parser.add_option('-c', '--configfile', dest='configfile',
             help='read configuration from FILE instead of default in %s' %
                 configfile, metavar='FILE')
@@ -131,7 +132,7 @@ def main():
         Start traydevice
     """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    logging.config.fileConfig(get_resource('logging.conf'))
+    logging.config.fileConfig(get_config_file('logging.conf'))
     main = Main()
     main.start()
 

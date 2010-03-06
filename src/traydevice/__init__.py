@@ -14,5 +14,9 @@
 #You should have received a copy of the GNU General Public License
 #along with this program; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-import main
-__version__=main.VERSION
+"""Lightweight,highly configurable single device systray representation
+
+Traydevice is a little systray application allowing you to conveniently execute
+configured commands on the specified defice.
+"""
+__version__='1.5.devel'

@@ -58,7 +58,7 @@
       <xs:documentation>
         Defines command to be executed and it's parameters.
         It is possible to pass either raw arguments, using nested element "arg" or
-        hal-property references, using nested element "ref"
+        device-property references, using nested element "ref"
       </xs:documentation>
     </xs:annotation>
     <xs:sequence>
@@ -81,7 +81,14 @@
       </xs:annotation>
       <xs:sequence>
         <xs:element name="displayed_if" type="T_condition"/>
-        <xs:element name="tooltip" type="T_tooltip"/>
+        <xs:element name="tooltip" type="T_command">
+          <xs:annotation>
+            <xs:documentation>
+            Defines tooltip construction.
+            Command is called, and it's standard output is used as tooltip value.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:elemnt>
       </xs:sequence>
       <xs:attribute name="icon" type="xs:string" use="required"/>
   </xs:complexType>
@@ -101,18 +108,6 @@
   </xs:complexType>
 
 
-  <xs:complexType name="T_tooltip">
-    <xs:annotation>
-      <xs:documentation>
-        Defines tooltip construction from hal property.
-        tooltip text is constructed by applying regular expression "regex" and
-        it's replacement "replacement" to hal-property referenced by "ref".
-      </xs:documentation>
-    </xs:annotation>
-    <xs:attribute name="regex" type="xs:string" use="required"/>
-    <xs:attribute name="replacement" type="xs:string" use="required"/>
-    <xs:attribute name="ref" type="xs:string" use="required"/>
-  </xs:complexType>
   
   <xs:complexType name="T_conjunction">
     <xs:annotation>
@@ -174,17 +169,16 @@
     </xs:choice>  
   </xs:complexType>
 
-  <!--TODO: support for all <match> atributes from hal specification http://www.marcuscom.com/hal-spec/hal-spec.html#fdi-matching -->
   <xs:complexType name="T_elementary_condition">
     <xs:annotation>
       <xs:documentation>
-        Single hal-property matching.
+        Single device-property matching.
       </xs:documentation>
     </xs:annotation>
     <xs:attribute name="key" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          hal-property key.
+          device-property key.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>

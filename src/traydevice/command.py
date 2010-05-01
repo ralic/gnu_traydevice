@@ -46,4 +46,7 @@ class Command:
         command = subprocess.Popen(args,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
-        self.logger.debug(command.communicate())
+        result = command.communicate()
+        result =command.returncode, result
+        self.logger.debug(result)
+        return result

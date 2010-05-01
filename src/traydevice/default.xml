@@ -20,6 +20,7 @@
 <!--
   Example configuration creating mount and umount entries in menu.
   Icon entries are gtk.STOCKITEMS(http://www.pygtk.org/docs/pygtk/gtk-stock-items.html)
+  Available device properties are listed at UDisks documentation(http://hal.freedesktop.org/docs/udisks/Device.html)
 -->
 <traydevice>
   <!-- 
@@ -33,29 +34,23 @@
           (or some of it's ancestors) has value "disk" 
       -->
       <displayed_if>
-        <match key="scsi.type" string="disk"/>
+        <match key="DeviceIsPartition" bool="true"/>
       </displayed_if>
-      <tooltip regex="(.*)" replacement="\1" ref="info.product"/>
+      <tooltip regex="(.*)" replacement="\1" ref="IdUuid"/>
     </icon>
     <icon icon="gtk.STOCK_CDROM">
       <displayed_if>
-        <match key="scsi.type" string="cdrom"/>
+        <match key="DeviceIsOpticalDisc" bool="true"/>
       </displayed_if>
       <!--construct tooltip on the device icon-->
-      <!-- by applying regex on hal property-->
-      <tooltip regex="(.*)" replacement="\1" ref="info.product"/>
+      <!-- by applying regex on device property-->
+      <tooltip regex="(.*)" replacement="\1" ref="IdUuid"/>
     </icon>
   </iconmap>
   <menuitem icon="gtk.STOCK_ADD" text="mount">
-    <!-- execute command pmount-hal, passing it hal udi of managed device -->
-    <command executable="pmount-hal">
-      <ref>info.udi</ref>
-    </command>
-    <command executable="echo">
-      <arg>Just demonstrate usage of constant parameters</arg>
-      <ref>info.vendor</ref>
-      <arg>How they can be mixed with property references</arg>
-      <ref>info.product</ref>
+    <command executable="/usr/bin/udisks">
+        <arg>--mount</arg>
+        <ref>DeviceFile</ref>
     </command>
     <!--
          allow clicking on this menuitem only if
@@ -63,20 +58,20 @@
       (if it's property "volume.is_mounted" has value "false")
      -->
     <enabled_if>
-      <not><match key="volume.is_mounted" bool="true"/></not>
+      <not><match key="DeviceIsMounted" bool="true"/></not>
     </enabled_if>
   </menuitem>
-  <!-- execute command pumount, passing it device node from hal property -->
   <menuitem icon="gtk.STOCK_REMOVE" text="umount">
-    <command executable="pumount">
-      <ref>block.device</ref>
+    <command executable="/usr/bin/udisks">
+        <arg>--unmount</arg>
+        <ref>DeviceFile</ref>
     </command>
     <!-- 
       allow clicking on this menuitem only if device is mounted
       (if it's property "volume.is_mounted" has value "true")
     -->
     <enabled_if>
-      <match key="volume.is_mounted" bool="true"/>
+      <match key="DeviceIsMounted" bool="true"/>
     </enabled_if>
   </menuitem>
 

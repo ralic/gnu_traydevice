@@ -25,30 +25,31 @@ import logging
 
 class Device(threading.Thread):
     """
-        Wraps hal connection to device 
+        Wraps dbus connection to device
     """
-
-    def __init__(self, udi, device_removed_listener):
-        """
-                Initialize the device
-                udi .. hal identifier of the device
-                device_removed_listener ... object, whose device_removed method
-                gets invoked in case device gets removed
-        """
+    def __init__(self, device_file_path, device_removed_listener):
         threading.Thread.__init__(self)
-        self.device_removed_listener = device_removed_listener
-        self.udi = udi
         self.logger = logging.getLogger('Device')
-
-        #setup a connection to dbus & hal
+        self.device_removed_listener = device_removed_listener
         DBusGMainLoop(set_as_default=True)
         self.bus = dbus.SystemBus()
-        self.hal_device = self.__create_device(self.udi)
-        self.bus.add_signal_receiver(self.__device_removed,
-            "DeviceRemoved",
-            "org.freedesktop.Hal.Manager",
-            "org.freedesktop.Hal",
-            "/org/freedesktop/Hal/Manager")
+        _udisks = self.bus.get_object(
+                                'org.freedesktop.UDisks',
+                                '/org/freedesktop/UDisks')
+        udisks = dbus.Interface(_udisks, 'org.freedesktop.UDisks')
+
+        self.device_object_path = udisks.FindDeviceByDeviceFile(
+                                                device_file_path)
+        _dbus_object_proxy = self.bus.get_object(
+                                    'org.freedesktop.UDisks',
+                                    self.device_object_path)
+        self.device = dbus.Interface(_dbus_object_proxy,
+                                    'org.freedesktop.UDisks.Device')
+        self.device_properties = dbus.Interface(_dbus_object_proxy,
+                                    'org.freedesktop.DBus.Properties')
+
+        udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
+
         gobject.threads_init()
         threads_init()
         self.loop = gobject.MainLoop()
@@ -58,7 +59,8 @@ class Device(threading.Thread):
             Return actual value of device property
         """
         try:
-            raw = self.__get_property(key)
+            raw = self.device_properties.Get('org.freedesktop.UDisks.Device',
+                                            key)
             if type(raw) == dbus.Boolean:
                 if raw:
                     return 'true'
@@ -67,7 +69,7 @@ class Device(threading.Thread):
             else:
                 return str(raw)
         except dbus.exceptions.DBusException:
-            self.logger.warning('property "%s" not found on device hierarchy' % key)
+            self.logger.warning('property "%s" not found on device' % key)
             return None
 
     def match(self, condition):
@@ -128,7 +130,8 @@ class Device(threading.Thread):
 
     def run(self):
         """
-           listens to hal event, killing the application when device is removed
+           listens to device removed event,
+           killing the application when device is removed
            this has to be invoked in separate thread so that it won;t block
            gui thread
         """
@@ -138,26 +141,7 @@ class Device(threading.Thread):
         self.loop.quit()
 
     def __device_removed(self, cause):
-            if self.udi == cause:
-                self.logger.debug(
-                    'device %s has been removed from system' % self.udi)
-                self.device_removed_listener.device_removed()
-
-    def __create_device(self, udi):
-            return dbus.Interface(
-              self.bus.get_object('org.freedesktop.Hal', udi),
-              'org.freedesktop.Hal.Device')
-
-    def __get_property(self, key, hal_device=None):
-        """
-            Recursively read value of hal property of given name.
-            Reads it from parent udi if it is not accessible from actual one
-        """
-        if hal_device == None:
-            hal_device = self.hal_device
-        try:
-            return hal_device.GetProperty(key)
-        except dbus.exceptions.DBusException:
-            parent_udi = hal_device.GetProperty('info.parent')
-            parent_object = self.__create_device(parent_udi)
-            return self.__get_property(key, parent_object)
+        if self.device_object_path == cause:
+            self.logger.debug(
+                'device %s has been removed from system' % cause)
+            self.device_removed_listener.device_removed()

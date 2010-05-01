@@ -6,7 +6,7 @@ on the specified device.
 
 Usage
 =====
-Using trydevice is fairly simple, just execute it passing it a hal UDI
+Using trydevice is fairly simple, just execute it passing it a device file 
 of device you want to have in systray. Icon will appear with actions in
 right-click menu. If device is removed from system, program terminates.
 traydevice --help should tell you everything you need to know.
@@ -22,7 +22,7 @@ Requirements
  - python-dbus
  - docbook2x (for manpages)
  - pyxdg
- - with default configuration it requires pmount for (u)mounting the device
+ - udisks 
 
 Installation
 ============

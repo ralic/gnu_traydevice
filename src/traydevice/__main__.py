@@ -29,6 +29,7 @@ import device
 import gui
 from traydevice import __version__
 
+
 def get_resource(resource):
     """
         Retrieve files from sources
@@ -55,10 +56,12 @@ class Main:
         """
             Initialize traydevice, parse command line, read configuration
         """
+        _prog = "%prog"
         configfile = get_config_file('default.xml')
         parser = OptionParser(usage="%prog [options] <device_file>",
-        version="%prog "+__version__)
-        parser.add_option('-c', '--configfile', dest='configfile',
+                              version="%s %s" % (_prog, __version__))
+        parser.add_option('-c', '--configfile',
+            dest='configfile',
             help='read configuration from FILE instead of default in %s' %
                 configfile, metavar='FILE')
         (opts, args) = parser.parse_args()
@@ -73,14 +76,14 @@ class Main:
         except Exception as e:
             logging.getLogger('Main').error(
                 'Cannot read configuration file \'%s\' (%s)'
-                %(configfile, e))
+                % (configfile, e))
             sys.exit(1)
         try:
             self.device = device.Device(args[0], self)
         except Exception as e:
             logging.getLogger('Main').error(
                 'Cannot access hal device \'%s\' (%s)'
-                %(args[0], e))
+                % (args[0], e))
             sys.exit(1)
         try:
             self.gui = gui.DeviceGui(configuration, self.device)

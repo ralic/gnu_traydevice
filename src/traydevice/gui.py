@@ -118,7 +118,7 @@ class DeviceGui(threading.Thread):
     def __get_gtk_stock_id(self, icon_name):
         try:
             return eval(icon_name)
-        except :
+        except:
             raise AssertionError('\'%s\' stockitem not found' % icon_name)
 
     def __create_widget_description(self, configuration):
@@ -140,7 +140,7 @@ class DeviceGui(threading.Thread):
 
     def __create_actions(self, configuration):
         """
-            Create a dictionary of menu actions and 
+            Create a dictionary of menu actions and
             commands assigned to them
         """
         actions = dict()

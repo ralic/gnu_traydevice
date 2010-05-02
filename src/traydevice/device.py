@@ -27,6 +27,7 @@ class Device(threading.Thread):
     """
         Wraps dbus connection to device
     """
+
     def __init__(self, device_file_path, device_removed_listener):
         threading.Thread.__init__(self)
         self.logger = logging.getLogger('Device')

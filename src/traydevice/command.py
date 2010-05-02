@@ -47,6 +47,6 @@ class Command:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         result = command.communicate()
-        result =command.returncode, result
+        result = command.returncode, result
         self.logger.debug(result)
         return result

@@ -19,4 +19,4 @@
 Traydevice is a little systray application allowing you to conveniently execute
 configured commands on the specified defice.
 """
-__version__='2.0.devel'
+__version__ = '2.0.devel'

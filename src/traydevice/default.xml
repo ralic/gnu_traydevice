@@ -1,50 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2009  Martin Špelina <shpelda at seznam dot cz>
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
--->
-
-<!--
   Example configuration creating mount and umount entries in menu.
   Icon entries are gtk.STOCKITEMS(http://www.pygtk.org/docs/pygtk/gtk-stock-items.html)
   Available device properties are listed at UDisks documentation(http://hal.freedesktop.org/docs/udisks/Device.html)
 -->
 <traydevice>
   <!-- 
-      a list of icons with conditions, when they should be displayed
-      first match is taken, when nothing matches, default_icon is used 
+      A list of icons with conditions, when they should be displayed
+      first match is taken, when nothing matches, default_icon is used.
   -->
-  <iconmap default_icon="gtk.STOCK_FLOPPY">
+ <iconmap default_icon="gtk.STOCK_FLOPPY">
     <icon icon="gtk.STOCK_HARDDISK">
       <!-- 
-          this icon is used if property "scsi.type" of the device
-          (or some of it's ancestors) has value "disk" 
+          Harddisk icon is used if property "DeviceIsPartition" is set to true.
       -->
       <displayed_if>
         <match key="DeviceIsPartition" bool="true"/>
       </displayed_if>
-      <tooltip regex="(.*)" replacement="\1" ref="IdUuid"/>
+      <!--
+        Tooltip text is created by simply echoing device property "IdUuid".
+      -->
+      <tooltip executable="/bin/echo"> 
+        <arg>-n</arg>
+        <ref>IdUuid</ref>
+      </tooltip>
     </icon>
     <icon icon="gtk.STOCK_CDROM">
       <displayed_if>
         <match key="DeviceIsOpticalDisc" bool="true"/>
       </displayed_if>
-      <!--construct tooltip on the device icon-->
-      <!-- by applying regex on device property-->
-      <tooltip regex="(.*)" replacement="\1" ref="IdUuid"/>
+      <tooltip executable="/bin/echo"> 
+        <arg>-n</arg>
+        <ref>IdUuid</ref>
+      </tooltip>
     </icon>
   </iconmap>
   <menuitem icon="gtk.STOCK_ADD" text="mount">
@@ -53,10 +41,9 @@
         <ref>DeviceFile</ref>
     </command>
     <!--
-         allow clicking on this menuitem only if
-         device is not mounted already
-      (if it's property "volume.is_mounted" has value "false")
-     -->
+      Allow clicking on "ADD" only if device is not mounted already
+      (if it's property "DeviceIsMounted" has value "false")
+    -->
     <enabled_if>
       <not><match key="DeviceIsMounted" bool="true"/></not>
     </enabled_if>
@@ -66,13 +53,8 @@
         <arg>--unmount</arg>
         <ref>DeviceFile</ref>
     </command>
-    <!-- 
-      allow clicking on this menuitem only if device is mounted
-      (if it's property "volume.is_mounted" has value "true")
-    -->
     <enabled_if>
       <match key="DeviceIsMounted" bool="true"/>
     </enabled_if>
   </menuitem>
-
 </traydevice>

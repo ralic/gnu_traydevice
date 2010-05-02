@@ -88,7 +88,7 @@
             Command is called, and it's standard output is used as tooltip value.
             </xs:documentation>
           </xs:annotation>
-        </xs:elemnt>
+        </xs:element>
       </xs:sequence>
       <xs:attribute name="icon" type="xs:string" use="required"/>
   </xs:complexType>

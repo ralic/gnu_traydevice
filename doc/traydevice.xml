@@ -45,7 +45,7 @@
 <para>
 Display device icon in system tray with a right-click menu with device commands.
 It is possible to configure icon itself, as well as commands in menu.
-Configuration is based on queriing HAL device properties.
+Configuration is based on queriing UDisks device properties.
 </para>
 </refsect1>
 
@@ -105,18 +105,15 @@ Configuration is based on queriing HAL device properties.
 
 
 <refsect1><title>Bugs</title>
-<para>This is still alpha version, so no consistent error handling is implemented.</para>
 </refsect1>
 
 <refsect1><title>See also</title>
 <para>
 <citerefentry>
-                                <refentrytitle>traydevice</refentrytitle>
-                                <manvolnum>5</manvolnum>
-                        </citerefentry>
-
+    <refentrytitle>traydevice</refentrytitle>
+    <manvolnum>5</manvolnum>
+    </citerefentry>
 </para>
 </refsect1>
-
 
 </refentry>

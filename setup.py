@@ -87,7 +87,10 @@ setup(cmdclass={'build': build, 'manpage': manpage},
     package_dir={'traydevice': 'src/traydevice'},
     package_data={'traydevice':
         ['configuration.xsd', 'default.xml','logging.conf']},
-    data_files=[('share/man/man1', ['build/share/man/man1/traydevice.1'])],
+    data_files=[
+                ('share/man/man1', ['build/share/man/man1/traydevice.1']),
+                ('share/man/man5', ['build/share/man/man5/traydevice.5'])
+               ],
     scripts=['scripts/traydevice'],
     author='Martin Špelina',
     author_email='shpelda at seznam dot cz',

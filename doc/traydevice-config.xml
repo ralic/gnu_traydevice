@@ -40,14 +40,13 @@
 <refsect1><title>Description</title>
 <para>
 Traydevice configuration file is a xml defined by @XSD_PATH@.
-This configuration sets up a menu, containing entries that get dynamically enabled or disabled using conditions quering <emphasis>hal</emphasis> device properties.
-For complete description of hal properties see  <ulink
-url="http://www.freedesktop.org/wiki/Software/hal">hal homepage</ulink>.
+This configuration sets up a menu containing entries that get dynamically enabled or disabled using conditions quering <emphasis>UDisks</emphasis> device properties.
+For complete description of device properties see  <ulink
+url="http://hal.freedesktop.org/docs/udisks/Device.html">udisks manual</ulink>.
 </para>
 <para>
-Configuration consists of 
-    <emphasis>iconmap</emphasis> 
-    and multiple <emphasis>menuentry</emphasis>
+Configuration consists of <emphasis>iconmap</emphasis> 
+    and multiple <emphasis>menuentry</emphasis>.
 </para>
 <refsect2><title>iconmap</title>
   <para>
@@ -58,7 +57,7 @@ Configuration consists of
   and a <emphasis>tooltip</emphasis> setting.
   </para>
   <para>
-  <emphasis>icon</emphasis> element has attribute 
+    <emphasis>icon</emphasis> element has attribute 
     <varlistentry>
       <term>icon</term>
       <listitem>
@@ -73,29 +72,10 @@ Configuration consists of
     Conditions are explained in separate section of this manual.
   </para>
   <para>
-    <emphasis>tooltip</emphasis> element has attributes:
-    <varlistentry>
-      <term>regex</term>
-      <listitem>
-        Regular expression that is used to select part of hal property.
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term>replacement</term>
-      <listitem>
-        Text replacement for <emphasis>regex</emphasis> match.
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term>ref</term>
-      <listitem>
-        A reference to hal property whose value vill be used as input.
-      </listitem>
-    </varlistentry>
+    <emphasis>tooltip</emphasis> is regular <emphasis>command</emphasis>,
+        whose standard output will be used as tooltip.
   </para>
-  <para>
-  </para> 
-</refsect2>
+  </refsect2>
 
 <refsect2><title>menuentry</title>
 <para>
@@ -142,7 +122,7 @@ in the traydevice right click menu. It is constructed from the <emphasis>enabled
       <varlistentry>
         <term><emphasis>ref</emphasis></term>
         <listitem>
-          A reference to hal property.
+          A reference to device property.
         </listitem>
       </varlistentry>
   </para>
@@ -150,8 +130,8 @@ in the traydevice right click menu. It is constructed from the <emphasis>enabled
 </refsect2>
 <refsect2><title>conditions</title>
 <para>
-Conditions are expressions evaluating whether particular hal properties have 
-expected values. Ordinary operators (NOT, OR, AND) can be used to construct complex conditions.
+Conditions are expressions evaluating whether particular device properties have 
+expected values. Logical operators (NOT, OR, AND) can be used to construct complex conditions.
 </para>
 <para>
 Simple condition is created using <emphasis>match</emphasis> element 
@@ -159,7 +139,7 @@ with attributes:
   <varlistentry>
     <term>key</term>
     <listitem>
-      A reference to hal property.
+      A reference to device property.
     </listitem>
   </varlistentry>
   <varlistentry>
@@ -183,7 +163,6 @@ with attributes:
       match an boolean property; 
     </listitem>
   </varlistentry>
-This property matching is very same as is used in hal fdi configuration.
 </para>
 <para>
 Simple conditions can be joined together using logical operators - elements <emphasis>or,not,and</emphasis>. For example:

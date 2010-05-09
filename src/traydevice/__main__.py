@@ -32,9 +32,12 @@ from traydevice import __version__
 
 def get_resource(resource):
     """
-        Retrieve files from sources
+        Retrieve resource files
     """
-    return os.path.join(os.path.dirname(__file__), resource)
+    _resource = os.path.join(os.path.dirname(__file__), resource)
+    if not os.path.exists( _resource ):
+        _resource = os.path.join(sys.prefix, 'share/traydevice/'+resource)
+    return _resource
 
 
 def get_config_file(filename):

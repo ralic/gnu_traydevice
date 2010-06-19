@@ -22,7 +22,7 @@
       -->
       <tooltip executable="/bin/echo"> 
         <arg>-n</arg>
-        <ref>IdUuid</ref>
+        <ref>IdLabel</ref>
       </tooltip>
     </icon>
     <icon icon="gtk.STOCK_CDROM">
@@ -31,7 +31,7 @@
       </displayed_if>
       <tooltip executable="/bin/echo"> 
         <arg>-n</arg>
-        <ref>IdUuid</ref>
+        <ref>IdLabel</ref>
       </tooltip>
     </icon>
   </iconmap>

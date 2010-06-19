@@ -16,7 +16,7 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 from distutils.command.build import build as _build
-from distutils.command.install_data import install_data
+from distutils.command.install_data import install_data as _install_data
 from distutils.command.install import install as _install
 from distutils.command.sdist import sdist as _sdist
 from distutils.core import setup
@@ -51,6 +51,23 @@ def patch_file(patch_line, file_to_patch):
             outfile.write(line)
 
 
+def cut_prefix(prefix, pathname):
+    """
+        Check that pathname is located under prefix,
+        and if it is, return pathname relative to prefix
+        return None if pathname is not located under prefix
+    """
+    if not prefix.startswith('/'):
+        prefix = '/' + prefix
+    if not prefix.endswith('/'):
+        prefix = prefix + '/'
+    if not pathname.startswith('/'):
+        pathname = '/' + pathname
+    if not commonprefix([prefix, pathname]) == prefix:
+        return None
+    return relpath(pathname, prefix)
+
+
 class package_ini(Command):
     """
         Locate 'package.ini' in all installed packages and patch it as
@@ -80,6 +97,18 @@ class package_ini(Command):
         """
         match = re.match("""
             (?P<identifier>\w+)\s*=.*\#\#SETUP_PATCH
+            \\(\"(?P<constant_expression>.*)\" """, line, re.VERBOSE)
+        if match:
+            print 'replacing' + line.replace('\n', '')
+            line = match.group('identifier')
+            line += ' = '
+            line += match.group('constant_expression')
+            line += '\n'
+            print 'With:' + line.replace('\n', '')
+            return line
+
+        match = re.match("""
+            (?P<identifier>\w+)\s*=.*\#\#SETUP_PATCH
                 \\((?P<command>.*)\.(?P<variable>.*)\\)""", line, re.VERBOSE)
         if not match:
             return line
@@ -105,12 +134,33 @@ class package_ini(Command):
             self)
 
 
-class install_manpage(install_data):
+class install_data(_install_data):
+
+    def initialize_options(self):
+        _install_data.initialize_options(self)
+        self.data_dir = None
+        self.install_base = None
+
+    def finalize_options(self):
+        self.set_undefined_options('install',
+                                   ('install_base', 'install_base'))
+        _install_data.finalize_options(self)
+
+        self.data_dir = self.install_dir
+        if self.root:
+            self.data_dir = relpath(self.install_dir, self.root)
+        self.data_dir = cut_prefix(self.install_base, self.data_dir)
+        if self.data_dir == None:
+            raise ValueError('Data must be installed under ' +
+                                self.install_base + ' directory')
+
+
+class install_manpage(_install_data):
     """Install manpages that are already built in build directory"""
     user_options = []
 
     def initialize_options(self):
-        install_data.initialize_options(self)
+        _install_data.initialize_options(self)
         self.build_base = None
         self.data_files = []
 
@@ -119,6 +169,7 @@ class install_manpage(install_data):
                                    ('install_man', 'install_dir'),
                                    ('build_base', 'build_base'),
                                   )
+        _install_data.finalize_options(self)
         for mantype in xrange(1, 9):
             manpages = glob(join(self.build_base, 'man') +
                                     '/*.%i' % mantype)
@@ -136,14 +187,16 @@ class install(_install):
 
     def initialize_options(self):
         _install.initialize_options(self)
-        self.install_man = 'man'
+        self.install_man = None
+        self.install_data = None
 
     def finalize_options(self):
         _install.finalize_options(self)
+        if not self.install_man:
+            self.install_man = self.install_base
         self.convert_paths('man')
         if self.root is not None:
             self.change_roots('man')
-        self.install_man = os.path.join(self.install_base, self.install_man)
 
 
 class build_manpage(Command):
@@ -156,12 +209,15 @@ class build_manpage(Command):
     def initialize_options(self):
         self.build_base = None
         self.data_dir = None
+        self.prefix = None
 
     def finalize_options(self):
         self.set_undefined_options('build',
                                    ('build_base', 'build_base'))
+        self.set_undefined_options('install',
+                                   ('prefix', 'prefix'))
         self.set_undefined_options('install_data',
-                                   ('install_dir', 'data_dir'))
+                                   ('data_dir', 'data_dir'))
 
     def man(self, input_file):
         """Create a manpage from docbook source file"""
@@ -183,7 +239,8 @@ class build_manpage(Command):
 
     def patch_line(self, line):
         return line.replace('@XSD_PATH@',
-                    join(self.data_dir, 'configuration.xsd'))
+                    join(self.prefix or "",
+                    join(self.data_dir, 'configuration.xsd')))
 
     def run(self):
         doc_dir = join(dirname(__file__), 'doc')

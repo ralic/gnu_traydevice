@@ -24,9 +24,9 @@ import shutil
 from xdg import BaseDirectory
 import logging
 import logging.config
-#fully qualified so that package data(version) is available
 import device
 import gui
+#fully qualified so that package data(version) is available
 from traydevice import __version__ as package_version
 from traydevice import __name__ as package_name
 from traydevice import __data_dir__ as package_data
@@ -85,7 +85,7 @@ class Main:
             self.device = device.Device(args[0], self)
         except Exception as e:
             logging.getLogger('Main').error(
-                'Cannot access hal device \'%s\' (%s)'
+                'Cannot access device \'%s\' (%s)'
                 % (args[0], e))
             sys.exit(1)
         try:

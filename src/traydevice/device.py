@@ -152,7 +152,9 @@ class Device(threading.Thread):
 
     def __device_changed(self, cause):
         if self.device_object_path == cause:
-           if self.__bool_match(self.get_property('DeviceIsMediaAvailable'),'false'):
+           if ((self.__bool_match(self.get_property('DeviceIsOpticalDisc'),'true') and
+                    self.__bool_match(self.get_property('OpticalDiscIsClosed'),'false')) 
+            or (self.__bool_match(self.get_property('DeviceIsMediaAvailable'),'false'))):
                 self.logger.debug(
                     'media from device %s has been removed' % cause)
                 self.device_removed_listener.device_removed()

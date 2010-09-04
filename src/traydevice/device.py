@@ -49,7 +49,10 @@ class Device(threading.Thread):
         self.device_properties = dbus.Interface(_dbus_object_proxy,
                                     'org.freedesktop.DBus.Properties')
 
-        udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
+        if self.__bool_match(self.get_property('DeviceIsRemovable'),'true'):
+            udisks.connect_to_signal('DeviceChanged', self.__device_changed)
+        else:
+            udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
 
         gobject.threads_init()
         threads_init()
@@ -146,3 +149,10 @@ class Device(threading.Thread):
             self.logger.debug(
                 'device %s has been removed from system' % cause)
             self.device_removed_listener.device_removed()
+
+    def __device_changed(self, cause):
+        if self.device_object_path == cause:
+           if self.__bool_match(self.get_property('DeviceIsMediaAvailable'),'false'):
+                self.logger.debug(
+                    'media from device %s has been removed' % cause)
+                self.device_removed_listener.device_removed()

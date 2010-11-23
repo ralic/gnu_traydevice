@@ -40,7 +40,7 @@ def patch_file(patch_line, file_to_patch):
         Modifies a file in place applying 'patch_line' function
         to each line of the file
     """
-    print 'patching file:' + file_to_patch
+    print('patching file:%s' %  file_to_patch)
     with open(file_to_patch, 'r') as infile:
         file_data = infile.readlines()
     with open(file_to_patch, 'w') as outfile:
@@ -99,12 +99,12 @@ class package_ini(Command):
             (?P<identifier>\w+)\s*=.*\#\#SETUP_PATCH
             \\(\"(?P<constant_expression>.*)\" """, line, re.VERBOSE)
         if match:
-            print 'replacing' + line.replace('\n', '')
+            print ('replacing %s' % line.replace('\n', ''))
             line = match.group('identifier')
             line += ' = '
             line += match.group('constant_expression')
             line += '\n'
-            print 'With:' + line.replace('\n', '')
+            print ('With:%s' % line.replace('\n', ''))
             return line
 
         match = re.match("""
@@ -112,7 +112,7 @@ class package_ini(Command):
                 \\((?P<command>.*)\.(?P<variable>.*)\\)""", line, re.VERBOSE)
         if not match:
             return line
-        print 'Replacing:' + line.replace('\n', '')
+        print ('Replacing:%s' % line.replace('\n', ''))
         line = match.group('identifier')
         line += ' = '
         data = '(self).distribution.get_command_obj(\'' + \
@@ -120,7 +120,7 @@ class package_ini(Command):
                 match.group('variable')
         line += '\'' + str(eval(data)) + '\''
         line += '\n'
-        print 'With:' + line.replace('\n', '')
+        print ('With:%s' % line.replace('\n', ''))
         return line
 
     def run(self):
@@ -128,7 +128,7 @@ class package_ini(Command):
             Patch package.ini files in distribution package
             with variables from setup
         """
-        walk(
+        os.walk(
             self.install_lib,
             package_ini.visit,
             self)
@@ -170,7 +170,7 @@ class install_manpage(_install_data):
                                    ('build_base', 'build_base'),
                                   )
         _install_data.finalize_options(self)
-        for mantype in xrange(1, 9):
+        for mantype in range(1, 9):
             manpages = glob(join(self.build_base, 'man') +
                                     '/*.%i' % mantype)
             if manpages:

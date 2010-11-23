@@ -128,11 +128,8 @@ class package_ini(Command):
             Patch package.ini files in distribution package
             with variables from setup
         """
-        os.walk(
-            self.install_lib,
-            package_ini.visit,
-            self)
-
+        for root, dirs, files in os.walk(self.install_lib):
+            self.visit(root, dirs + files)
 
 class install_data(_install_data):
 

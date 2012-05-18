@@ -57,15 +57,19 @@ def cut_prefix(prefix, pathname):
         and if it is, return pathname relative to prefix
         return None if pathname is not located under prefix
     """
-    if not prefix.startswith('/'):
-        prefix = '/' + prefix
-    if not prefix.endswith('/'):
-        prefix = prefix + '/'
-    if not pathname.startswith('/'):
-        pathname = '/' + pathname
+    prefix = ensure_slashed(prefix)
+    pathname = ensure_slashed(pathname)
     if not commonprefix([prefix, pathname]) == prefix:
         return None
     return relpath(pathname, prefix)
+
+def ensure_slashed(pathname):
+    if not pathname.startswith('/'):
+        pathname = '/' + pathname
+    if not pathname.endswith('/'):
+        pathname = pathname + '/'
+    return normpath(pathname) 
+
 
 
 class package_ini(Command):
@@ -142,14 +146,18 @@ class install_data(_install_data):
         self.set_undefined_options('install',
                                    ('install_base', 'install_base'))
         _install_data.finalize_options(self)
-
+        self.install_dir = normpath(self.install_dir)
         self.data_dir = self.install_dir
         if self.root:
-            self.data_dir = relpath(self.install_dir, self.root)
+            self.data_dir = relpath(self.data_dir, self.root)
         self.data_dir = cut_prefix(self.install_base, self.data_dir)
         if self.data_dir == None:
             raise ValueError('Data must be installed under ' +
                                 self.install_base + ' directory')
+        self.data_dir = normpath(self.data_dir)
+        if self.root:
+            self.install_dir = join(self.root, self.install_dir)
+        print ('relative data_dir:%s'%self.data_dir)
 
 
 class install_manpage(_install_data):
@@ -236,8 +244,9 @@ class build_manpage(Command):
 
     def patch_line(self, line):
         return line.replace('@XSD_PATH@',
+                    normpath(
                     join(self.prefix or "",
-                    join(self.data_dir, 'configuration.xsd')))
+                    join(self.data_dir, 'configuration.xsd'))))
 
     def run(self):
         doc_dir = join(dirname(__file__), 'doc')
@@ -279,27 +288,27 @@ class sdist(_sdist):
 
 
 docs = pydoc.splitdoc(traydevice.__doc__)
-
-setup(
-    cmdclass={build.__name__: build,
-              build_manpage.__name__: build_manpage,
-              install_manpage.__name__: install_manpage,
-              install_data.__name__: install_data,
-              install.__name__: install,
-              sdist.__name__: sdist,
-              package_ini.__name__: package_ini},
-    name=traydevice.__name__,
-    description=docs[0],
-    long_description=docs[1],
-    packages=[traydevice.__name__],
-    package_dir={traydevice.__name__: 'src/traydevice'},
-    package_data={traydevice.__name__: ['package.ini']},
-    data_files=[('', glob('data/*')),
-                ('', ['README.txt']),
-                ('', ['LICENSE.txt'])],
-    scripts=glob('scripts/*'),
-    author='Martin Špelina',
-    author_email='shpelda at gmail dot com',
-    license='GPL',
-    url='https://savannah.nongnu.org/projects/traydevice/',
-    platforms='linux')
+if __name__=='__main__':
+    setup(
+        cmdclass={build.__name__: build,
+                  build_manpage.__name__: build_manpage,
+                  install_manpage.__name__: install_manpage,
+                  install_data.__name__: install_data,
+                  install.__name__: install,
+                  sdist.__name__: sdist,
+                  package_ini.__name__: package_ini},
+        name=traydevice.__name__,
+        description=docs[0],
+        long_description=docs[1],
+        packages=[traydevice.__name__],
+        package_dir={traydevice.__name__: 'src/traydevice'},
+        package_data={traydevice.__name__: ['package.ini']},
+        data_files=[('', glob('data/*')),
+                    ('', ['README.txt']),
+                    ('', ['LICENSE.txt'])],
+        scripts=glob('scripts/*'),
+        author='Martin Špelina',
+        author_email='shpelda at gmail dot com',
+        license='GPL',
+        url='https://savannah.nongnu.org/projects/traydevice/',
+        platforms='linux')

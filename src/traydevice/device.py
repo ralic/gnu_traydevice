@@ -54,7 +54,7 @@ class Device(threading.Thread):
         else:
             udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
 
-        gobject.threads_init()
+        gobject.threads_init() #@UndefinedVariable
         threads_init()
         self.loop = gobject.MainLoop()
 
@@ -152,7 +152,7 @@ class Device(threading.Thread):
 
     def __device_changed(self, cause):
         if self.device_object_path == cause:
-           if ((self.__bool_match(self.get_property('DeviceIsOpticalDisc'),'true') and
+            if ((self.__bool_match(self.get_property('DeviceIsOpticalDisc'),'true') and
                     self.__bool_match(self.get_property('OpticalDiscIsClosed'),'false')) 
             or (self.__bool_match(self.get_property('DeviceIsMediaAvailable'),'false'))):
                 self.logger.debug(

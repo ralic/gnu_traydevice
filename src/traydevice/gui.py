@@ -19,7 +19,6 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import threading
-import re
 from command import Command
 
 
@@ -93,9 +92,9 @@ class DeviceGui(threading.Thread):
                 icon = i.getparent()
                 break
         if icon == None:
-            map = configuration.xpath('/traydevice/iconmap')[0]
+            iconmap = configuration.xpath('/traydevice/iconmap')[0]
             return \
-                self.__create_trayicon(map.get('default_icon'),
+                self.__create_trayicon(iconmap.get('default_icon'),
                   None)
         tooltip_configuration = icon.find('tooltip')
         return self.__create_trayicon(

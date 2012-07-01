@@ -31,9 +31,29 @@
     </xs:annotation>
     <xs:sequence>
       <xs:element name="iconmap" type="T_iconmap"/>
-      <xs:element name="menuitem" type="T_menuitem" maxOccurs="unbounded"/> 
+      <xs:element name="menuitem" type="T_menuitem" maxOccurs="unbounded"/>
     </xs:sequence>
+    <xs:attribute name="backend" type="xs:string" default="org.freedesktop.UDisks">
+    <xs:annotation>
+      <xs:documentation>
+        Selected backed affects which properties are accepted.
+      </xs:documentation>
+    </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
+  
+
+  <xs:simpleType name="T_backend">
+  <xs:annotation>
+    <xs:documentation>
+      Supported device backend versions.
+    </xs:documentation>
+  </xs:annotation>
+	<xs:restriction base="xs:string">
+	  <xs:enumeration value="org.freedesktop.UDisks"/>
+	  <xs:enumeration value="org.freedesktop.UDisks2"/>
+	</xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="T_menuitem">
     <xs:annotation>

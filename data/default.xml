@@ -2,9 +2,10 @@
 <!--
   Example configuration creating mount and umount entries in menu.
   Icon entries are gtk.STOCKITEMS(http://www.pygtk.org/docs/pygtk/gtk-stock-items.html)
-  Available device properties are listed at UDisks documentation(http://hal.freedesktop.org/docs/udisks/Device.html)
+  Available device(org.freedesktop.UDisks) properties are listed at UDisks documentation(http://hal.freedesktop.org/docs/udisks/Device.html)
+  Available device(org.freedesktop.UDisks2) properties are listed at UDisks2 documentation(http://people.freedesktop.org/~david/udisks2-20110628/gdbus-org.freedesktop.UDisks2.BlockDevice.html) 
 -->
-<traydevice>
+<traydevice backend='org.freedesktop.UDisks'>
   <!-- 
       A list of icons with conditions, when they should be displayed
       first match is taken, when nothing matches, default_icon is used.

@@ -32,6 +32,7 @@ from traydevice import __name__ as package_name
 from traydevice import __data_dir__ as package_data
 
 
+
 def get_resource(resource):
     """
         Retrieve resource files
@@ -82,17 +83,24 @@ class Main:
                 % (configfile, e))
             sys.exit(1)
         try:
-            self.device = device.Device(args[0], self)
+            version_init = {'org.freedesktop.UDisks': 'device.UdisksDevice(args[0], self)'
+                            , 'org.freedesktop.UDisks2': 'device.Udisks2Device(args[0], self)'
+                           }
+            configured = configuration.xpath('/traydevice/@backend')
+            if configured:
+                configured=configured[0]
+            else:
+                configured='org.freedesktop.UDisks'
+            self.device = eval(version_init[configured]);#device.Device(args[0], self)
         except Exception as e:
-            logging.getLogger('Main').error(
-                'Cannot access device \'%s\' (%s)'
-                % (args[0], e))
+            logging.getLogger('Main').exception('Cannot access device \'%s\''%args[0]);
             sys.exit(1)
         try:
             self.gui = gui.DeviceGui(configuration, self.device)
         except Exception as e:
-            logging.getLogger('Main').error(
-                'Gui construction failed. (%s)' % e)
+            logging.getLogger('Main').exception('Gui construction failed.');
+#            logging.getLogger('Main').error(
+#                'Gui construction failed. (%s)' % e)
             sys.exit(1)
 
     def start(self):

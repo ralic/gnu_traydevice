@@ -178,7 +178,7 @@ class Udisks2Device(Thread):
     """
     def __init__(self, device_file_path, device_removed_listener):
       Thread.__init__(self)
-      
+      self.logger = logging.getLogger('Udisks2Device')
       self.device_removed_listener = device_removed_listener
       DBusGMainLoop(set_as_default=True)
       self.bus = dbus.SystemBus()
@@ -188,7 +188,6 @@ class Udisks2Device(Thread):
       udisks2proxy = self.bus.get_object('org.freedesktop.UDisks2','/org/freedesktop/UDisks2')
       object_manager =  dbus.Interface(udisks2proxy, 'org.freedesktop.DBus.ObjectManager')
       object_manager.connect_to_signal('InterfacesRemoved', self.__interface_removed, byte_arrays=True)
-       
       managed  = object_manager.GetManagedObjects(byte_arrays=True)
       
       self.object_path = self.get_object_path(managed, device_file_path)

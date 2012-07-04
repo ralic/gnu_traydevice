@@ -51,3 +51,4 @@ reference various device properties.
 TODO
 ====
  - non stockitem icons
+ - patch build scripts so that they'll generate list of todos/fixmes into deployed README.txt

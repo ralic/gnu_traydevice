@@ -83,15 +83,12 @@ class Main:
                 % (configfile, e))
             sys.exit(1)
         try:
-            version_init = {'org.freedesktop.UDisks': 'device.UdisksDevice(args[0], self)'
-                            , 'org.freedesktop.UDisks2': 'device.Udisks2Device(args[0], self)'
-                           }
-            configured = configuration.xpath('/traydevice/@backend')
-            if configured:
-                configured=configured[0]
+            configured_backend = configuration.xpath('/traydevice/@backend')
+            if configured_backend:
+                configured_backend=configured_backend[0]
             else:
-                configured='org.freedesktop.UDisks'
-            self.device = eval(version_init[configured]);#device.Device(args[0], self)
+                configured_backend=None
+            self.device = device.create_device(args[0], self, configured_backend)
         except Exception as e:
             logging.getLogger('Main').exception('Cannot access device \'%s\''%args[0]);
             sys.exit(1)

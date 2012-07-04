@@ -21,13 +21,16 @@ from dbus.mainloop.glib import threads_init
 import dbus
 import gobject
 import logging
+from dbustools import org_freedesktop_DBus_Properties as DBusProperties
+from dbustools import org_freedesktop_DBus_ObjectManager as DBusObjectManager
+from dbustools import org_freedesktop_DBus_Introspectable as DBusIntrospectable
 
 class PropertyResolver:
     """
         An implementation of boolean logic operations over properties  
     """
-    def __init__(self, device):
-        self.device = device
+    def __init__(self, property_accessor):
+        self.property_accessor = property_accessor
         
     def match(self, condition):
         """
@@ -57,7 +60,7 @@ class PropertyResolver:
             xsd:T_elementary_condition
         """
         key = condition.get('key')
-        value = self.device.get_property(key)
+        value = self.property_accessor.get_property(key)
         for match in condition.items():
             if match[0] == 'key':
                 continue
@@ -82,154 +85,199 @@ class PropertyResolver:
         return value == match
 
     def bool_match(self, value, match):
-        return value == match
+        logging.getLogger(__name__).debug('value:%s match:%s'%(value, match))
+        return value == bool(match)
       
-class UdisksDevice(Thread):
+class PropertyAccessor:
+  """
+    Provides a way to access properties 
+  """
+  def __init__(self, system_bus, bus_name, device_object_path):
+    self.logger = logging.getLogger(__name__)
+    self.system_bus = system_bus
+    self.BUS_NAME = bus_name
+    self.DEVICE_OBJECT_PATH = device_object_path
+    
+  def get_property(self, key):
     """
-        Wraps dbus connection to org.freedesktop.UDisks.Device
+        Return actual value of device property
     """
-    def __init__(self, device_file_path, device_removed_listener):
-        Thread.__init__(self)
-        self.logger = logging.getLogger('UdisksDevice')
-        self.device_removed_listener = device_removed_listener
-        DBusGMainLoop(set_as_default=True)
-        self.bus = dbus.SystemBus()
-        _udisks = self.bus.get_object(
-                                'org.freedesktop.UDisks',
-                                '/org/freedesktop/UDisks')
-        udisks = dbus.Interface(_udisks, 'org.freedesktop.UDisks')
-
-        self.device_object_path = udisks.FindDeviceByDeviceFile(
-                                                device_file_path)
-        _dbus_object_proxy = self.bus.get_object(
-                                    'org.freedesktop.UDisks',
-                                    self.device_object_path)
-        self.device = dbus.Interface(_dbus_object_proxy,
-                                    'org.freedesktop.UDisks.Device')
-        self.device_properties = dbus.Interface(_dbus_object_proxy,
-                                    'org.freedesktop.DBus.Properties')
-        
-        self.resolver = PropertyResolver(self)
-
-        if self.resolver.bool_match(self.get_property('DeviceIsRemovable'),'true'):
-            udisks.connect_to_signal('DeviceChanged', self.__device_changed)
+    try:
+        keylist = self.parse_key(key)
+        keylist.reverse()
+        raw = self.get_property_from_keylist(keylist, self.DEVICE_OBJECT_PATH)
+        from dbustools import dbus_to_object
+        result =  dbus_to_object(raw)
+        self.logger.debug("get_property %s:dbus-value=%s, result='%s'",key, raw, result)
+        return result
+    except dbus.exceptions.DBusException:
+        self.logger.warning('property "%s" not found on device' % key, exc_info=1)
+        return None
+    
+  def get_property_from_keylist(self, keylist, device_object_path):
+    """ Recursively retrieve value of property 'k' at keylist[0](i,k) where value at keylist[x,x>1](i,k) means object name for keylist[x-1](i,k)"""
+    interface_name, property_name = keylist.pop()
+    dbus_object_proxy = self.system_bus.get_object(
+                          self.BUS_NAME,
+                          device_object_path)
+    if not interface_name:
+      introspection = DBusIntrospectable(dbus_object_proxy)
+      metadata = introspection.Introspect()
+      available_properties = introspection.get_interface_properties(metadata)
+      match=[]
+      for interface_name, properties in available_properties.items():
+        if property_name in properties:
+          match.append(interface_name)
+      if len(match)==1:
+        interface_name = match[0]
+      else:
+        if match:
+          raise ValueError("Unable to unique identify property name'%s', possible interfaces are '%s'"%(property_name, ','.join(match)))#FIXME:use custom exception
         else:
-            udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
-
-        gobject.threads_init() #@UndefinedVariable
-        threads_init()
-        self.loop = gobject.MainLoop()
-
-    def get_property(self, key):
-        """
-            Return actual value of device property
-        """
-        try:
-            raw = self.device_properties.Get('org.freedesktop.UDisks.Device',
-                                            key)
-            if type(raw) == dbus.Boolean:
-                if raw:
-                    return 'true'
-                else:
-                    return 'false'
-            else:
-                return str(raw)
-        except dbus.exceptions.DBusException:
-            self.logger.warning('property "%s" not found on device' % key)
-            return None
-    def match(self, condition):
-        """
-            Return True if this device matches condition defined by
-            xsd:T_condition
-        """
-        return self.resolver.match(condition);
-    
-    def run(self):
-        """
-           listens to device removed event,
-           killing the application when device is removed
-           this has to be invoked in separate thread so that it won;t block
-           gui thread
-        """
-        self.loop.run()
-
-    def stop(self):
-        self.loop.quit()
-
-    def __device_removed(self, cause):
-        if self.device_object_path == cause:
-            self.logger.debug(
-                'device %s has been removed from system' % cause)
-            self.device_removed_listener.device_removed()
-
-    def __device_changed(self, cause):
-        if self.device_object_path == cause:
-            if ((self.__bool_match(self.get_property('DeviceIsOpticalDisc'),'true') and
-                    self.__bool_match(self.get_property('OpticalDiscIsClosed'),'false')) 
-            or (self.__bool_match(self.get_property('DeviceIsMediaAvailable'),'false'))):
-                self.logger.debug(
-                    'media from device %s has been removed' % cause)
-                self.device_removed_listener.device_removed()
-        
-                
-class Udisks2Device(Thread):
+          raise ValueError("No interface contains property name '%s'"%property_name)#FIXME:use custom exception
+    property_value = DBusProperties(dbus_object_proxy).Get(interface_name, property_name)
+    self.logger.debug('get_property_from_keylist %s.%s:%s',interface_name, property_name, property_value)
+    if keylist:
+      return self.get_property_from_keylist(keylist, property_value)
+    else:
+      return property_value
+  
+  def parse_key(self, key):
     """
-        Wraps dbus connection to org.freedesktop.UDisks2.BlockDevice
+      Accepted property keys are in format [/][(interfacename)]propertyName[/[(interfacename)]propertyName]*
+      where interfacename is completely optional.
+      '/' means link-target so /Drive/Media means : read ..Block property 'Drive', fetch object referenced there(if any) and return it's 
+      property 'Media'
+      returns list(tuple(interface, local_key)) 
     """
-    def __init__(self, device_file_path, device_removed_listener):
-      Thread.__init__(self)
-      self.logger = logging.getLogger('Udisks2Device')
-      self.device_removed_listener = device_removed_listener
-      DBusGMainLoop(set_as_default=True)
-      self.bus = dbus.SystemBus()
-      
-      self.resolver = PropertyResolver(self)
-      
-      udisks2proxy = self.bus.get_object('org.freedesktop.UDisks2','/org/freedesktop/UDisks2')
-      object_manager =  dbus.Interface(udisks2proxy, 'org.freedesktop.DBus.ObjectManager')
-      object_manager.connect_to_signal('InterfacesRemoved', self.__interface_removed, byte_arrays=True)
-      managed  = object_manager.GetManagedObjects(byte_arrays=True)
-      
-      self.object_path = self.get_object_path(managed, device_file_path)
-      self.logger.info('Connected to udisks object_path:%s'%self.object_path)
-      
-      gobject.threads_init() #@UndefinedVariable
-      threads_init()
-      self.loop = gobject.MainLoop()
+    result=[]
+    for lk in key.split('/'):
+      lk=lk.strip('/')
+      lk=lk.strip();
+      if not lk:
+        continue
+      interface = None
+      property_key = lk
+      if ')' in lk:
+        i,k = lk.split(')')
+        i=i.strip('()')
+        i=i.strip()
+        if i:
+          interface = i
+        property_key = k.strip()
+      result.append((interface, property_key))
+    return result
+
+def create_device(device_file_path, device_removed_listener, configured_backend='org.freedesktop.UDisks'):
+
+  DBusGMainLoop(set_as_default=True)
+  mainloop = gobject.MainLoop()
+  system_bus =  dbus.SystemBus()
+  backend_init = {'org.freedesktop.UDisks': 'backend_org_freedesktop_UDisks'
+                , 'org.freedesktop.UDisks2': 'backend_org_freedesktop_Udisks2'
+               }
+  gobject.threads_init() #@UndefinedVariable
+  threads_init()
+  backend = eval(backend_init[configured_backend])(system_bus, device_file_path)
+  return Device(device_removed_listener, mainloop, system_bus, backend)
+
+class Device(Thread):
+  def __init__(self, device_removed_listener, mainloop, system_bus, backend):
+    Thread.__init__(self)
+    self.logger = logging.getLogger(__name__)
+    self.logger.info('Connected to %s object_path:%s'%(backend, backend.DEVICE_OBJECT_PATH))
+    self.accessor = PropertyAccessor(system_bus, backend.BUS_NAME, backend.DEVICE_OBJECT_PATH)
+    self.resolver = PropertyResolver(self.accessor)
+    backend.register_device_removed_listener(self, system_bus, device_removed_listener)
+    self.loop = mainloop
     
-    def get_object_path(self, managed, device_file_path):
-      from os.path import realpath,samefile
-      from dbustools import dbus_to_string
-      for object_path, interfaces in managed.items():
-        if not 'org.freedesktop.UDisks2.Block' in interfaces:
-          continue
-        block = interfaces['org.freedesktop.UDisks2.Block']
-        if samefile(dbus_to_string(block['Device']), realpath(device_file_path)):
-          return object_path;
-      return None
-        
-    def get_property(self, key):
-      return None
+  def get_property(self, key):
+      """
+          Return actual value of device property
+      """
+      return self.accessor.get_property(key)
     
-    def run(self):
-        self.logger.debug('Udisks2Device Started')
-        self.loop.run()
-    
-    def stop(self):
-        self.loop.quit()
-    
-    def match(self, condition):
-        return self.resolver.match(condition);
+  def match(self, condition):
+      """
+          Return True if this device matches condition defined by
+          xsd:T_condition
+      """
+      return self.resolver.match(condition);
+  
+  def run(self):
+      """
+         listens to device removed event,
+         killing the application when device is removed
+         this has to be invoked in separate thread so that it won;t block
+         gui thread
+      """
+      self.loop.run()
+
+  def stop(self):
+      self.loop.quit()
+
       
-    def __interface_removed(self, object_path, interfaces):
-      device_removed_apis=[
-        'org.freedesktop.UDisks2.BlockDevice'# — Low-level Block Device
-        ,'org.freedesktop.UDisks2.Filesystem'# — Block device containing a mountable filesystem
-        ,'org.freedesktop.UDisks2.Swapspace'# — Block device containing swap data
-        ,'org.freedesktop.UDisks2.Encrypted'# — Block device containing encrypted data
-                           ]
-      if self.object_path == object_path:
-        for api in device_removed_apis:
-          if api in interfaces:
-            self.logger.info('Api %s of device %s has been removed from system.' %(api, object_path))
-            self.device_removed_listener.device_removed()
+class backend_org_freedesktop_UDisks:
+  BUS_NAME='org.freedesktop.UDisks'
+  def __init__(self, system_bus, device_file_path):
+    self.logger = logging.getLogger(__name__)
+    _udisks = system_bus.get_object(self.BUS_NAME, '/org/freedesktop/UDisks')
+    self.udisks = dbus.Interface(_udisks, 'org.freedesktop.UDisks')
+    self.DEVICE_OBJECT_PATH = self.udisks.FindDeviceByDeviceFile(device_file_path)
+  
+  def register_device_removed_listener(self, device, system_bus, device_removed_listener):
+    if device.get_property('DeviceIsRemovable'):
+        self.udisks.connect_to_signal('DeviceChanged', self.__device_changed)
+    else:
+        self.udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
+
+  def __device_removed(self, cause):
+      if self.DEVICE_OBJECT_PATH == cause:
+          self.logger.debug(
+              'device %s has been removed from system' % cause)
+          self.device_removed_listener.device_removed()
+
+  def __device_changed(self, cause):
+      if self.DEVICE_OBJECT_PATH == cause:
+          if (self.device.get_property('DeviceIsOpticalDisc') 
+                and not self.device.get_property('OpticalDiscIsClosed')
+              ) or not self.device.get_property('DeviceIsMediaAvailable'):
+              self.logger.debug('Media from device %s has been removed' % cause)
+              self.device_removed_listener.device_removed()
+              
+
+class backend_org_freedesktop_Udisks2:
+  BUS_NAME='org.freedesktop.UDisks2'
+  def __init__(self, system_bus, device_file_path):
+    self.logger = logging.getLogger(__name__)
+    udisks2proxy = system_bus.get_object(self.BUS_NAME,'/org/freedesktop/UDisks2')
+    self.object_manager = DBusObjectManager(udisks2proxy)
+    managed  = self.object_manager.GetManagedObjects()
+    self.DEVICE_OBJECT_PATH = self.__get_object_path(managed, device_file_path)
+
+  def register_device_removed_listener(self, device, system_bus, device_removed_listener):
+    self.object_manager.connect_to_InterfacesRemoved(self.__interface_removed)
+    
+  def __get_object_path(self, managed, device_file_path):
+    from os.path import realpath,samefile
+    from dbustools import dbus_to_string
+    for object_path, interfaces in managed.items():
+      if not 'org.freedesktop.UDisks2.Block' in interfaces:
+        continue
+      block = interfaces['org.freedesktop.UDisks2.Block']
+      if samefile(dbus_to_string(block['Device']), realpath(device_file_path)):
+        return object_path;
+    return None
+  
+  def __interface_removed(self, object_path, interfaces):
+    device_removed_apis=[
+      'org.freedesktop.UDisks2.Block'# — Low-level Block Device
+      ,'org.freedesktop.UDisks2.Filesystem'# — Block device containing a mountable filesystem
+      ,'org.freedesktop.UDisks2.Swapspace'# — Block device containing swap data
+      ,'org.freedesktop.UDisks2.Encrypted'# — Block device containing encrypted data
+                         ]
+    if self.DEVICE_OBJECT_PATH == object_path:
+      for api in device_removed_apis:
+        if api in interfaces:
+          self.logger.info('Api %s of device %s has been removed from system.' %(api, object_path))
+          self.device_removed_listener.device_removed()

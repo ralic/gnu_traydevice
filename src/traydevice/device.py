@@ -31,7 +31,7 @@ class PropertyResolver:
     """
     def __init__(self, property_accessor):
         self.property_accessor = property_accessor
-        
+
     def match(self, condition):
         """
             Return True if this device matches condition defined by
@@ -87,7 +87,7 @@ class PropertyResolver:
     def bool_match(self, value, match):
         logging.getLogger(__name__).debug('value:%s match:%s'%(value, match))
         return value == bool(match)
-      
+
 class PropertyAccessor:
   """
     Provides a way to access properties 
@@ -97,7 +97,7 @@ class PropertyAccessor:
     self.system_bus = system_bus
     self.BUS_NAME = bus_name
     self.DEVICE_OBJECT_PATH = device_object_path
-    
+
   def get_property(self, key):
     """
         Return actual value of device property
@@ -113,7 +113,7 @@ class PropertyAccessor:
     except dbus.exceptions.DBusException:
         self.logger.warning('property "%s" not found on device' % key, exc_info=1)
         return None
-    
+
   def get_property_from_keylist(self, keylist, device_object_path):
     """ Recursively retrieve value of property 'k' at keylist[0](i,k) where value at keylist[x,x>1](i,k) means object name for keylist[x-1](i,k)"""
     interface_name, property_name = keylist.pop()
@@ -141,7 +141,7 @@ class PropertyAccessor:
       return self.get_property_from_keylist(keylist, property_value)
     else:
       return property_value
-  
+
   def parse_key(self, key):
     """
       Accepted property keys are in format [/][(interfacename)]propertyName[/[(interfacename)]propertyName]*
@@ -190,20 +190,20 @@ class Device(Thread):
     self.resolver = PropertyResolver(self.accessor)
     backend.register_device_removed_listener(self, system_bus, device_removed_listener)
     self.loop = mainloop
-    
+
   def get_property(self, key):
       """
           Return actual value of device property
       """
       return self.accessor.get_property(key)
-    
+
   def match(self, condition):
       """
           Return True if this device matches condition defined by
           xsd:T_condition
       """
       return self.resolver.match(condition);
-  
+
   def run(self):
       """
          listens to device removed event,
@@ -216,7 +216,7 @@ class Device(Thread):
   def stop(self):
       self.loop.quit()
 
-      
+
 class backend_org_freedesktop_UDisks:
   BUS_NAME='org.freedesktop.UDisks'
   def __init__(self, system_bus, device_file_path):
@@ -224,7 +224,7 @@ class backend_org_freedesktop_UDisks:
     _udisks = system_bus.get_object(self.BUS_NAME, '/org/freedesktop/UDisks')
     self.udisks = dbus.Interface(_udisks, 'org.freedesktop.UDisks')
     self.DEVICE_OBJECT_PATH = self.udisks.FindDeviceByDeviceFile(device_file_path)
-  
+
   def register_device_removed_listener(self, device, system_bus, device_removed_listener):
     if device.get_property('DeviceIsRemovable'):
         self.udisks.connect_to_signal('DeviceChanged', self.__device_changed)
@@ -244,7 +244,7 @@ class backend_org_freedesktop_UDisks:
               ) or not self.device.get_property('DeviceIsMediaAvailable'):
               self.logger.debug('Media from device %s has been removed' % cause)
               self.device_removed_listener.device_removed()
-              
+
 
 class backend_org_freedesktop_Udisks2:
   BUS_NAME='org.freedesktop.UDisks2'
@@ -257,7 +257,7 @@ class backend_org_freedesktop_Udisks2:
 
   def register_device_removed_listener(self, device, system_bus, device_removed_listener):
     self.object_manager.connect_to_InterfacesRemoved(self.__interface_removed)
-    
+
   def __get_object_path(self, managed, device_file_path):
     from os.path import realpath,samefile
     from dbustools import dbus_to_string
@@ -268,7 +268,7 @@ class backend_org_freedesktop_Udisks2:
       if samefile(dbus_to_string(block['Device']), realpath(device_file_path)):
         return object_path;
     return None
-  
+
   def __interface_removed(self, object_path, interfaces):
     device_removed_apis=[
       'org.freedesktop.UDisks2.Block'# — Low-level Block Device

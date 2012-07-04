@@ -36,7 +36,7 @@ class DBusInterfaceWrapper:
 		This has to be overriden
 	"""
 	DBUS_API_NAME=None
-	
+
 	def __init__(self, dbus_proxy_object):
 		self.proxy = dbus_proxy_object
 		self.dbus_interface = Interface(dbus_proxy_object, self.DBUS_API_NAME)
@@ -73,7 +73,7 @@ class org_freedesktop_DBus_Properties(DBusInterfaceWrapper):
 
 	"""	        
 	If one or more properties change on an object, the org.freedesktop.DBus.Properties.PropertiesChanged signal may be emitted (this signal was added in 0.14):
-	
+
 	              org.freedesktop.DBus.Properties.PropertiesChanged (STRING interface_name,
 	                                                                 DICT<STRING,VARIANT> changed_properties,
 	                                                                 ARRAY<STRING> invalidated_properties);
@@ -85,13 +85,13 @@ class org_freedesktop_DBus_ObjectManager(DBusInterfaceWrapper):
 	byte_arrays=True
 	def __init__(self, dbus_proxy_object):
 		DBusInterfaceWrapper.__init__(self, dbus_proxy_object);
-	
+
 	"""
 		org.freedesktop.DBus.ObjectManager.GetManagedObjects (out DICT<OBJPATH,DICT<STRING,DICT<STRING,VARIANT>>> objpath_interfaces_and_properties);
 	"""
 	def GetManagedObjects(self):
 		return self.dbus_interface.GetManagedObjects(byte_arrays=self.byte_arrays)
-	
+
 	"""
 		signal_handler is a method implementing this signature:
 		org.freedesktop.DBus.ObjectManager.InterfacesAdded (OBJPATH object_path,
@@ -99,7 +99,7 @@ class org_freedesktop_DBus_ObjectManager(DBusInterfaceWrapper):
 	"""
 	def connect_to_InterfacesAdded(self, signal_handler_method):
 		self.dbus_interface.connect_to_signal('InterfacesAdded', signal_handler_method, byte_arrays=self.byte_arrays)
-	
+
 	"""
 		signal_handler is a method implementing this signature:
 		org.freedesktop.DBus.ObjectManager.InterfacesRemoved (OBJPATH object_path,
@@ -107,20 +107,20 @@ class org_freedesktop_DBus_ObjectManager(DBusInterfaceWrapper):
 	"""
 	def connect_to_InterfacesRemoved(self, signal_handler_method):
 		self.dbus_interface.connect_to_signal('InterfacesRemoved', signal_handler_method, byte_arrays=self.byte_arrays)
-		
+
 
 class org_freedesktop_DBus_Introspectable(DBusInterfaceWrapper):
 	DBUS_API_NAME='org.freedesktop.DBus.Introspectable'
 	byte_arrays=True
 	def __init__(self, dbus_proxy_object):
 		DBusInterfaceWrapper.__init__(self, dbus_proxy_object);
-	
+
 	"""
 		org.freedesktop.DBus.Introspectable.Introspect (out STRING xml_data)
 	"""
 	def Introspect(self):
 		return self.dbus_interface.Introspect()
-	
+
 	"""
 		Fetch dictionary(interface_name, list of property names available for interface)
 	"""
@@ -132,6 +132,5 @@ class org_freedesktop_DBus_Introspectable(DBusInterfaceWrapper):
 			getLogger(__name__).debug("Analysing '%s'"%interface_name)
 			result[interface_name]=parsed.xpath("//interface[@name='%s']/property/@name"%interface_name)
 		return result
-		
-		
-	
+
+

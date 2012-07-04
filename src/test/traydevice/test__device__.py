@@ -4,7 +4,7 @@ from unittest import main
 import device
 
 class test_parse_key(TestCase):
-  
+
     def test_empty_key(self):
       tested = device.PropertyAccessor(None, None, None)
       self.assertEqual([], tested.parse_key(''))
@@ -26,7 +26,7 @@ class test_parse_key(TestCase):
       self.assertEqual([('org.freedesktop.UDisks2.Block','Drive')
                        ,('org.freedesktop.UDisks2.Drive','Media'),]
                        , tested.parse_key('(org.freedesktop.UDisks2.Block)Drive/(org.freedesktop.UDisks2.Drive)Media'))
-         
+
 
 if __name__=='__main__':
     main()    

@@ -3,7 +3,7 @@
   Example configuration creating mount and umount entries in menu.
   Icon entries are gtk.STOCKITEMS(http://www.pygtk.org/docs/pygtk/gtk-stock-items.html)
   Available device(org.freedesktop.UDisks) properties are listed at UDisks documentation(http://hal.freedesktop.org/docs/udisks/Device.html)
-  Available device(org.freedesktop.UDisks2) properties are listed at 
+  Available device(org.freedesktop.UDisks2) properties are listed at http://people.freedesktop.org/~david/udisks2-20111102/
 -->
 <traydevice backend='org.freedesktop.UDisks2'>
   <!-- 
@@ -13,7 +13,9 @@
  <iconmap default_icon="gtk.STOCK_FLOPPY">
     <icon icon="gtk.STOCK_CDROM">
       <displayed_if>
-        <match key="Drive/MediaRemovable" bool="true"/>
+        <and>
+          <match key="Drive/Optical" bool="true"/>
+        </and>
       </displayed_if>
       <!--
         Tooltip text is created by simply echoing device property "IdUuid".
@@ -32,7 +34,7 @@
         <ref>Device</ref>
     </command>
     <enabled_if>
-      <not><match key="MountPoints" string=""/></not>
+      <not><match key="MountPoints" string="[]"/></not>
     </enabled_if>
   </menuitem>
 </traydevice>

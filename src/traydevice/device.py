@@ -25,35 +25,44 @@ from dbustools import org_freedesktop_DBus_Properties as DBusProperties
 from dbustools import org_freedesktop_DBus_ObjectManager as DBusObjectManager
 from dbustools import org_freedesktop_DBus_Introspectable as DBusIntrospectable
 
+
 class PropertyResolver:
     """
         An implementation of boolean logic operations over properties  
     """
     def __init__(self, property_accessor):
         self.property_accessor = property_accessor
+        self.logger = logging.getLogger(__name__)
 
     def match(self, condition):
         """
             Return True if this device matches condition defined by
             xsd:T_condition
         """
-        return self.__complex_match(condition.getchildren()[0])
-
+        return self.__complex_match(filter(self.is_not_ignored_tag, condition)[0])
+    
+    def is_not_ignored_tag(self, condition):
+      from lxml.etree import Comment
+      return condition.tag != Comment
+    
     def __complex_match(self, condition):
         if 'and' == condition.tag:
-            for child in condition.getchildren():
+            for child in filter(self.is_not_ignored_tag, condition):
+                self.logger.debug('testing %s'%child)              
                 if not self.__complex_match(child):
                     return False
             return True
         if 'or' == condition.tag:
-            for child in condition.getchildren():
+            for child in filter(self.is_not_ignored_tag, condition):
                 if self.__complex_match(child):
                     return True
             return False
         if 'not' == condition.tag:
-            return not self.__complex_match(condition.getchildren()[0])
+            return not self.__complex_match(filter(self.is_not_ignored_tag, condition)[0])
         if 'match' == condition.tag:
             return self.__elementary_match(condition)
+          
+        self.logger.error('%s tag(%s) not recognized'%(condition, condition.tag))
 
     def __elementary_match(self, condition):
         """ return True is this device matches condition definded by
@@ -64,29 +73,24 @@ class PropertyResolver:
         for match in condition.items():
             if match[0] == 'key':
                 continue
-            if match[0] == 'string':
-                if self.string_match(value, match[1]):
-                    return True
-                continue
-            if match[0] == 'int':
-                if self.int_match(value, match[1]):
-                    return True
-                continue
-            if match[0] == 'bool':
-                if self.bool_match(value, match[1]):
-                    return True
-                continue
-        pass
+            match_method = eval('self.%s_match'%match[0])
+            result = match_method(value, match[1])
+            self.logger.debug('%s value:%s,match:%s, result:%s'%(match_method, value, match, result))
+            if match_method(value, match[1]):
+              return True
 
     def string_match(self, value, match):
-        return value == match
+        return str(value) == match
 
     def int_match(self, value, match):
         return value == match
 
     def bool_match(self, value, match):
-        logging.getLogger(__name__).debug('value:%s match:%s'%(value, match))
         return value == bool(match)
+      
+    def regex_match(self, value, match):
+        import re
+        return re.match(match, value) is not None
 
 class PropertyAccessor:
   """

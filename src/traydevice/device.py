@@ -144,7 +144,7 @@ class PropertyAccessor:
 
   def parse_key(self, key):
     """
-      Accepted property keys are in format [/][(interfacename)]propertyName[/[(interfacename)]propertyName]*
+      Accepted property keys are in format [/][interfacename.]propertyName[/[interfacename.]propertyName]*
       where interfacename is completely optional.
       '/' means link-target so /Drive/Media means : read ..Block property 'Drive', fetch object referenced there(if any) and return it's 
       property 'Media'
@@ -152,15 +152,16 @@ class PropertyAccessor:
     """
     result=[]
     for lk in key.split('/'):
-      lk=lk.strip('/')
+      lk=lk.strip('./')
       lk=lk.strip();
       if not lk:
         continue
       interface = None
       property_key = lk
-      if ')' in lk:
-        i,k = lk.split(')')
-        i=i.strip('()')
+      if '.' in lk:
+        last_dot = lk.rfind('.')
+        i = lk[0:last_dot]
+        k = lk[last_dot+1:]
         i=i.strip()
         if i:
           interface = i

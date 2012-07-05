@@ -15,7 +15,7 @@ class test_parse_key(TestCase):
 
     def test_simple_qualified_key(self):
       tested = device.PropertyAccessor(None, None, None)
-      self.assertEqual([('org.freedesktop.UDisks2.Block','IdLabel')], tested.parse_key('(org.freedesktop.UDisks2.Block)IdLabel'))
+      self.assertEqual([('org.freedesktop.UDisks2.Block','IdLabel')], tested.parse_key('org.freedesktop.UDisks2.Block.IdLabel'))
 
     def test_nested_unqualified_key(self):
       tested = device.PropertyAccessor(None, None, None)
@@ -25,7 +25,7 @@ class test_parse_key(TestCase):
       tested = device.PropertyAccessor(None, None, None)
       self.assertEqual([('org.freedesktop.UDisks2.Block','Drive')
                        ,('org.freedesktop.UDisks2.Drive','Media'),]
-                       , tested.parse_key('(org.freedesktop.UDisks2.Block)Drive/(org.freedesktop.UDisks2.Drive)Media'))
+                       , tested.parse_key('org.freedesktop.UDisks2.Block.Drive/org.freedesktop.UDisks2.Drive.Media'))
 
 
 if __name__=='__main__':

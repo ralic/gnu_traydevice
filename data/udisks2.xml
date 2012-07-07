@@ -10,7 +10,46 @@
       A list of icons with conditions, when they should be displayed
       first match is taken, when nothing matches, default_icon is used.
   -->
- <iconmap default_icon="gtk.STOCK_FLOPPY">
+ <iconmap default_icon="gtk.STOCK_DIALOG_QUESTION">
+
+
+   <icon icon="gtk.STOCK_FLOPPY">
+      <!-- 
+          Harddisk icon is used if property "DeviceIsPartition" is set to true.
+      -->
+      <displayed_if>
+        <and>
+          <match key="Drive/MediaRemovable" bool="true"/>
+          <match key="Drive/Optical" bool="false"/>
+        </and>
+      </displayed_if>
+      <!--
+        Tooltip text is created by simply echoing device property "IdUuid".
+      -->
+      <tooltip executable="/bin/echo"> 
+        <arg>-n</arg>
+        <ref>PreferredDevice</ref>
+      </tooltip>
+    </icon>
+
+   <icon icon="gtk.STOCK_HARDDISK">
+      <!-- 
+          Harddisk icon is used if property "DeviceIsPartition" is set to true.
+      -->
+      <displayed_if>
+        <match key="Drive/MediaRemovable" bool="false"/>
+      </displayed_if>
+      <!--
+        Tooltip text is created by simply echoing device property "PreferredDevice".
+      -->
+      <tooltip executable="/bin/echo"> 
+        <arg>-n</arg>
+        <ref>PreferredDevice</ref>
+      </tooltip>
+    </icon>
+
+
+
     <icon icon="gtk.STOCK_CDROM">
       <displayed_if>
         <and>
@@ -25,6 +64,8 @@
         <ref>IdLabel</ref>
       </tooltip>
     </icon>
+    
+    
   </iconmap>
   
   <menuitem icon="gtk.STOCK_REMOVE" text="unmount">

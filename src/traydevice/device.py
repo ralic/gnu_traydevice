@@ -24,6 +24,7 @@ import logging
 from dbustools import org_freedesktop_DBus_Properties as DBusProperties
 from dbustools import org_freedesktop_DBus_ObjectManager as DBusObjectManager
 from dbustools import org_freedesktop_DBus_Introspectable as DBusIntrospectable
+from numpy.distutils.fcompiler import str2bool
 
 
 class PropertyResolver:
@@ -86,7 +87,17 @@ class PropertyResolver:
         return value == match
 
     def bool_match(self, value, match):
-        return value == bool(match)
+        value = self.str2bool(value)
+        match = self.str2bool(match)
+        return match == value
+      
+    
+    def str2bool(self, v):
+      try:
+        v = v.lower()
+      except:
+        pass
+      return v in (True, "yes", "true", "t", "1")
       
     def regex_match(self, value, match):
         import re
@@ -111,7 +122,9 @@ class PropertyAccessor:
         keylist.reverse()
         raw = self.get_property_from_keylist(keylist, self.DEVICE_OBJECT_PATH)
         from dbustools import dbus_to_object
-        result =  dbus_to_object(raw)
+        result = dbus_to_object(raw)
+        if result is None:
+          result=''
         self.logger.debug("get_property %s:dbus-value=%s, result='%s'",key, raw, result)
         return result
     except dbus.exceptions.DBusException:

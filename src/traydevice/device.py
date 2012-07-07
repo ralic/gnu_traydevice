@@ -24,7 +24,6 @@ import logging
 from dbustools import org_freedesktop_DBus_Properties as DBusProperties
 from dbustools import org_freedesktop_DBus_ObjectManager as DBusObjectManager
 from dbustools import org_freedesktop_DBus_Introspectable as DBusIntrospectable
-from numpy.distutils.fcompiler import str2bool
 
 
 class PropertyResolver:

@@ -11,8 +11,6 @@
       first match is taken, when nothing matches, default_icon is used.
   -->
  <iconmap default_icon="gtk.STOCK_DIALOG_QUESTION">
-
-
    <icon icon="gtk.STOCK_FLOPPY">
       <!-- 
           Harddisk icon is used if property "DeviceIsPartition" is set to true.
@@ -48,8 +46,6 @@
       </tooltip>
     </icon>
 
-
-
     <icon icon="gtk.STOCK_CDROM">
       <displayed_if>
         <and>
@@ -64,8 +60,6 @@
         <ref>IdLabel</ref>
       </tooltip>
     </icon>
-    
-    
   </iconmap>
   
   <menuitem icon="gtk.STOCK_REMOVE" text="unmount">

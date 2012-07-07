@@ -85,10 +85,9 @@ class Main:
         try:
             configured_backend = configuration.xpath('/traydevice/@backend')
             if configured_backend:
-                configured_backend=configured_backend[0]
+                self.device = device.create_device(args[0], self, configured_backend[0])
             else:
-                configured_backend=None
-            self.device = device.create_device(args[0], self, configured_backend)
+              self.device = device.create_device(args[0], self)
         except Exception as e:
             logging.getLogger('Main').exception('Cannot access device \'%s\''%args[0]);
             sys.exit(1)

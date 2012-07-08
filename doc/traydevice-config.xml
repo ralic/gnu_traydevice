@@ -41,12 +41,15 @@
 <para>
 Traydevice configuration file is a xml defined by @XSD_PATH@.
 This configuration sets up a menu containing entries that get dynamically enabled or disabled using conditions quering <emphasis>UDisks</emphasis> device properties.
-For complete description of device properties see  <ulink
-url="http://hal.freedesktop.org/docs/udisks/Device.html">udisks manual</ulink>.
+<emphasis>UDisks</emphasis> comes in two api versions, you're free to choose the one you like. 
+For complete description of device properties see  either 
+<ulink url="http://hal.freedesktop.org/docs/udisks/Device.html">udisks manual</ulink> or 
+<ulink url=" http://udisks.freedesktop.org/docs/latest/">udisks2 manual</ulink>
 </para>
 <para>
 Configuration consists of <emphasis>iconmap</emphasis> 
     and multiple <emphasis>menuentry</emphasis>.
+On toplevel, <emphasis>backend</emphasis> attribute defines used udisks api.
 </para>
 <refsect2><title>iconmap</title>
   <para>
@@ -128,7 +131,26 @@ in the traydevice right click menu. It is constructed from the <emphasis>enabled
   </para>
 
 </refsect2>
-<refsect2><title>conditions</title>
+
+<refsect2><title>Property links</title>
+property_reference=[interface_name.]&lt;property_name&gt;[/property_reference].
+<para>
+Where <emphasis>interface_name</emphasis> is dbus interface name, i.e.'org.freedesktop.UDisks2.Block',
+<emphasis>property_name</emphasis> is  Interface specific property name, ie. 'Device'.
+<emphasis>interface_name</emphasis> is optional as long as <emphasis>property_name</emphasis> can be 
+uniquelly resolved. 
+</para>
+<para>
+It's possible to query other Dbus objects than the one passed from commandline, using object-link properties.
+For example property org.freedesktop.UDisks2.Block.Drive contains object link to object that the block device belongs to, 
+so 'Drive/Optical' would yield true if original device is an optical disc.
+Please note that 'Drive/Optical' is always replaceable by fully qualified name org.freedesktop.UDisks2.Block.Drive/org.freedesktop.UDisks2.Drive.Optical.
+Fully qualified names should be used whenever name conflicts occur.
+</para>
+
+</refsect2>
+
+<refsect2><title>Conditions</title>
 <para>
 Conditions are expressions evaluating whether particular device properties have 
 expected values. Logical operators (NOT, OR, AND) can be used to construct complex conditions.
@@ -146,9 +168,15 @@ with attributes:
     <term>string(optional)</term>
     <listitem>
       match a string property; 
-      for example &lt;match key="foo.bar" string="baz"&gt;  
-      will match only if 'foo.bar' is a string property 
+      for example &lt;match key="foo" string="baz"&gt;  
+      will match only if 'foo' is a string property 
       assuming the value 'baz'. 
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>regex(optional)</term>
+    <listitem>
+      match a string property against regular expression. 
     </listitem>
   </varlistentry>
   <varlistentry>
@@ -169,17 +197,17 @@ Simple conditions can be joined together using logical operators - elements <emp
 <screen><![CDATA[
 <displayed_if>
   <and>
-    <match property="foo.bar" int="5"/>
+    <match property="foo" int="5"/>
     <or>
-      <match property="foo.balls" int="1"/>
-      <match property="foo.balls" int="2"/>
+      <match property="fooballs" int="1"/>
+      <match property="fooballs" int="2"/>
     </or>
     <not>
-      <match property="foo.frog" boolean="true"/>
+      <match property="foofrog" boolean="true"/>
     </not>
   </and>
 </displayed_if>]]></screen>
-Will display the icon if <quote>foo.bar</quote> has value 5, <quote>foo.bals</quote> has value 1 or 2 and <quote>foo.frog</quote> is not equal to true.
+Will display the icon if <quote>foo</quote> has value 5, <quote>foobals</quote> has value 1 or 2 and <quote>foofrog</quote> is not equal to true.
 </para>
 </refsect2>
 

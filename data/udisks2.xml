@@ -11,9 +11,10 @@
       first match is taken, when nothing matches, default_icon is used.
   -->
  <iconmap default_icon="gtk.STOCK_DIALOG_QUESTION">
+ 
    <icon icon="gtk.STOCK_FLOPPY">
       <!-- 
-          Harddisk icon is used if property "DeviceIsPartition" is set to true.
+          Floppy icon is used for removable non-optical devices.
       -->
       <displayed_if>
         <and>
@@ -22,7 +23,7 @@
         </and>
       </displayed_if>
       <!--
-        Tooltip text is created by simply echoing device property "IdUuid".
+        Tooltip text is created by simply echoing device property "PreferredDevice".
       -->
       <tooltip executable="/bin/echo"> 
         <arg>-n</arg>
@@ -32,7 +33,7 @@
 
    <icon icon="gtk.STOCK_HARDDISK">
       <!-- 
-          Harddisk icon is used if property "DeviceIsPartition" is set to true.
+          Harddisk icon is used if property "Drive/MediaRemovable" is set to false.
       -->
       <displayed_if>
         <match key="Drive/MediaRemovable" bool="false"/>
@@ -53,7 +54,7 @@
         </and>
       </displayed_if>
       <!--
-        Tooltip text is created by simply echoing device property "IdUuid".
+        Tooltip text is created by simply echoing device property "IdLabel".
       -->
       <tooltip executable="/bin/echo"> 
         <arg>-n</arg>

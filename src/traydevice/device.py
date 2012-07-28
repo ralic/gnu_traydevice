@@ -231,7 +231,9 @@ class Device(Thread):
       self.loop.run()
 
   def stop(self):
+      self.logger.debug("Terminating device loop.")
       self.loop.quit()
+      self.logger.debug("Device loop terminated.")
 
 
 class backend_org_freedesktop_UDisks:
@@ -243,10 +245,12 @@ class backend_org_freedesktop_UDisks:
     self.DEVICE_OBJECT_PATH = self.udisks.FindDeviceByDeviceFile(device_file_path)
 
   def register_device_removed_listener(self, device, system_bus, device_removed_listener):
+    self.device_removed_listener=device_removed_listener
     if device.get_property('DeviceIsRemovable'):
         self.udisks.connect_to_signal('DeviceChanged', self.__device_changed)
     else:
         self.udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
+    
 
   def __device_removed(self, cause):
       if self.DEVICE_OBJECT_PATH == cause:
@@ -273,6 +277,7 @@ class backend_org_freedesktop_Udisks2:
     self.DEVICE_OBJECT_PATH = self.__get_object_path(managed, device_file_path)
 
   def register_device_removed_listener(self, device, system_bus, device_removed_listener):
+    self.device_removed_listener=device_removed_listener
     self.object_manager.connect_to_InterfacesRemoved(self.__interface_removed)
 
   def __get_object_path(self, managed, device_file_path):

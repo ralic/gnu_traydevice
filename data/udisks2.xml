@@ -73,4 +73,16 @@
       <not><match key="MountPoints" string="[]"/></not>
     </enabled_if>
   </menuitem>
+  
+  <menuitem icon="gtk.STOCK_ADD" text="mount">
+    <command executable="/usr/bin/udisksctl">
+        <arg>mount</arg>
+        <arg>-b</arg>
+        <ref>Device</ref>
+    </command>
+    <enabled_if>
+      <match key="MountPoints" string="[]"/>
+    </enabled_if>
+  </menuitem>
+  
 </traydevice>

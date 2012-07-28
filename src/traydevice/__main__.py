@@ -73,12 +73,12 @@ class Main:
             configfile = opts.configfile
 
         if len(args) != 1:
-            logging.getLogger('Main').error('device_file argument is required')
+            logging.getLogger(__name__).error('device_file argument is required')
             sys.exit(1)
         try:
             configuration = self.__open_configuration(configfile)
         except Exception as e:
-            logging.getLogger('Main').error(
+            logging.getLogger(__name__).error(
                 'Cannot read configuration file \'%s\' (%s)'
                 % (configfile, e))
             sys.exit(1)
@@ -89,13 +89,13 @@ class Main:
             else:
               self.device = device.create_device(args[0], self)
         except Exception as e:
-            logging.getLogger('Main').exception('Cannot access device \'%s\''%args[0]);
+            logging.getLogger(__name__).exception('Cannot access device \'%s\''%args[0]);
             sys.exit(1)
         try:
             self.gui = gui.DeviceGui(configuration, self.device)
         except Exception as e:
-            logging.getLogger('Main').exception('Gui construction failed.');
-#            logging.getLogger('Main').error(
+            logging.getLogger(__name__).exception('Gui construction failed.');
+#            logging.getLogger(__name__).error(
 #                'Gui construction failed. (%s)' % e)
             sys.exit(1)
 
@@ -117,6 +117,7 @@ class Main:
         """
             Device.device_removed_listener callback
         """
+        logging.getLogger(__name__).debug('Terminating...');
         self.stop()
 
     def __open_configuration(self, configuration_file):
@@ -141,7 +142,11 @@ def main():
         Start traydevice
     """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    logging.config.fileConfig(get_resource('logging.conf'))
+    try:
+      logging.config.fileConfig(get_resource('logging.conf'))
+    except:
+      logging.basicConfig(level=logging.DEBUG)
+      logging.getLogger('root').warn('Failed to configure logging from %s'%get_resource('logging.conf'), exc_info=1)
     main = Main()
     main.start()
 

@@ -41,7 +41,7 @@ def get_resource(resource):
     return os.path.join(_resource_dir, resource)
 
 
-def get_config_file(filename):
+def get_config_file(filename, get_name_only=False):
     """
         Retrieve path to configuration file identified by
         filename. If file does not exist at location defined by
@@ -49,6 +49,8 @@ def get_config_file(filename):
     """
     xdg = os.path.join(
         BaseDirectory.save_config_path('traydevice'), filename)
+    if get_name_only:
+        return xdg
     if not os.path.exists(xdg):
         shutil.copyfile(get_resource(filename), xdg)
     return xdg
@@ -61,15 +63,17 @@ class Main:
             Initialize traydevice, parse command line, read configuration
         """
         _prog = "%prog"
-        configfile = get_config_file('default.xml')
         parser = OptionParser(usage="%prog [options] <device_file>",
                               version="%s %s" % (_prog, package_version))
+        default_config_name='default.xml'
         parser.add_option('-c', '--configfile',
             dest='configfile',
             help='read configuration from FILE instead of default in %s' %
-                configfile, metavar='FILE')
+                get_config_file(default_config_name, True), metavar='FILE')
         (opts, args) = parser.parse_args()
-        if opts.configfile != None:
+        if not opts.configfile:
+            configfile = get_config_file(default_config_name)
+        else:
             configfile = opts.configfile
 
         if len(args) != 1:

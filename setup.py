@@ -164,10 +164,9 @@ class install_data(_install_data):
     
     def run(self):
         _install_data.run(self)
-        absolute_data_dir=join(self.install_dir, self.data_dir)
-        default = join(absolute_data_dir, self.default_config) 
-        link = join(absolute_data_dir, 'default.xml') 
-        shutil.copyfile(default, link)  
+        default = join(self.install_dir, self.default_config)
+        link = join(self.install_dir, 'default.xml')
+        shutil.copyfile(default, link)
 
 
 class install_manpage(_install_data):

@@ -285,13 +285,13 @@ class sdist(_sdist):
     """
     user_options = _sdist.user_options + [
         ('version=', None, "version of deployed application"),
-        ('releaseResponsible=', None, 
+        ('release-responsible=', None, 
             "Savannah account that will publish source distribution to downloads area.")]
 
     def initialize_options(self):
         _sdist.initialize_options(self)
         self.version = 'devel'
-        self.releaseResponsible = None
+        self.release_responsible = None
 
     def finalize_options(self):
         _sdist.finalize_options(self)
@@ -303,10 +303,10 @@ class sdist(_sdist):
             setup_cfg.write('version=' + self.version)
         _sdist.run(self)
         os.remove('setup.cfg')
-        if self.releaseResponsible:
+        if self.release_responsible:
             for archive in self.get_archive_files():
                 print('Publishing %s to savannahh..'%archive)
-                subprocess.call(['scp', archive,'%s@dl.sv.nongnu.org:/releases/%s/'%(self.releaseResponsible, traydevice.__name__)])
+                subprocess.call(['scp', archive,'%s@dl.sv.nongnu.org:/releases/%s/'%(self.release_responsible, traydevice.__name__)])
 
 
 docs = pydoc.splitdoc(traydevice.__doc__)

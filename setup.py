@@ -141,10 +141,13 @@ class install_data(_install_data):
         _install_data.initialize_options(self)
         self.data_dir = None
         self.install_base = None
+        self.default_config = None
 
     def finalize_options(self):
         self.set_undefined_options('install',
-                                   ('install_base', 'install_base'))
+                                   ('install_base', 'install_base'),
+                                   ('default_config', 'default_config')
+                                  )
         _install_data.finalize_options(self)
         self.install_dir = normpath(self.install_dir)
         self.data_dir = self.install_dir
@@ -158,6 +161,13 @@ class install_data(_install_data):
         if self.root:
             self.install_dir = join(self.root, self.install_dir)
         print ('relative data_dir:%s'%self.data_dir)
+    
+    def run(self):
+        _install_data.run(self)
+        absolute_data_dir=join(self.install_dir, self.data_dir)
+        default = join(absolute_data_dir, self.default_config) 
+        link = join(absolute_data_dir, 'default.xml') 
+        shutil.copyfile(default, link)  
 
 
 class install_manpage(_install_data):
@@ -188,12 +198,15 @@ class install(_install):
            (install_manpage.__name__, None)]
 
     user_options = _install.user_options + [
-        ('install-man=', None, "directory for Unix man pages")]
+        ('install-man=', None, "directory for Unix man pages"),
+        ('default-config=', None, 
+            "Default configuration to use - can be udisks1.xml or udisks2.xml")]
 
     def initialize_options(self):
         _install.initialize_options(self)
         self.install_man = None
         self.install_data = None
+        self.default_config = None
 
     def finalize_options(self):
         _install.finalize_options(self)
@@ -202,6 +215,8 @@ class install(_install):
         self.convert_paths('man')
         if self.root is not None:
             self.change_roots('man')
+        if not self.default_config:
+            self.default_config='udisks1.xml'
 
 
 class build_manpage(Command):

@@ -161,7 +161,7 @@ class install_data(_install_data):
                                 self.install_base + ' directory')
         self.data_dir = normpath(self.data_dir)
         if self.root:
-            self.install_dir = join(self.root, self.install_dir)
+            self.install_dir = normpath(join(self.root, self.install_dir))
         print ('relative data_dir:%s'%self.data_dir)
     
     def run(self):

@@ -23,6 +23,7 @@ from distutils.core import setup
 from distutils.core import Command
 from distutils.errors import DistutilsFileError
 from distutils.command.build_py import build_py
+from distutils.dist import Distribution as _Distribution
 import subprocess
 import shutil
 import os
@@ -82,13 +83,14 @@ class package_ini(Command):
     def initialize_options(self):
         self.packages = None
         self.install_lib = None
-        self.version = self.distribution.get_version()
+        self.version = None
 
     def finalize_options(self):
         self.set_undefined_options(build_py.__name__,
                                    ('packages', 'packages'))
         self.set_undefined_options(install.__name__,
                                    ('install_lib', 'install_lib'))
+        self.version = self.distribution.get_version()
 
     def visit(self, dirname, names):
         if basename(dirname) in self.packages:
@@ -298,7 +300,7 @@ class sdist(_sdist):
     def run(self):
         self.distribution.metadata.version = self.version
         with open('setup.cfg', 'w') as setup_cfg:
-            setup_cfg.write('[' + package_ini.__name__ + ']\n')
+            setup_cfg.write('[global]\n')
             setup_cfg.write('version=' + self.version)
         _sdist.run(self)
         os.remove('setup.cfg')
@@ -309,8 +311,16 @@ class sdist(_sdist):
 
 
 docs = pydoc.splitdoc(traydevice.__doc__)
+
+class Distribution(_Distribution):
+    def parse_config_files(self, filenames=None):
+        _Distribution.parse_config_files(self, filenames)
+        self.metadata.version=self.version
+        pass
+
 if __name__=='__main__':
     setup(
+        distclass=Distribution,
         cmdclass={build.__name__: build,
                   build_manpage.__name__: build_manpage,
                   install_manpage.__name__: install_manpage,

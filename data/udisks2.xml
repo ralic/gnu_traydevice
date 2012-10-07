@@ -10,7 +10,7 @@
       A list of icons with conditions, when they should be displayed
       first match is taken, when nothing matches, default_icon is used.
   -->
- <iconmap default_icon="gtk.STOCK_DIALOG_QUESTION">
+ <iconmap default_icon="gtk.STOCK_DIALOG_ERROR">
  
    <icon icon="gtk.STOCK_FLOPPY">
       <!-- 

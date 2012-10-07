@@ -246,11 +246,8 @@ class backend_org_freedesktop_UDisks:
 
   def register_device_removed_listener(self, device, system_bus, device_removed_listener):
     self.device_removed_listener=device_removed_listener
-    if device.get_property('DeviceIsRemovable'):
-        self.udisks.connect_to_signal('DeviceChanged', self.__device_changed)
-    else:
-        self.udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
-    
+    self.udisks.connect_to_signal('DeviceChanged', self.__device_changed)
+    self.udisks.connect_to_signal('DeviceRemoved', self.__device_removed)
 
   def __device_removed(self, cause):
       if self.DEVICE_OBJECT_PATH == cause:

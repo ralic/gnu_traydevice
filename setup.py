@@ -24,6 +24,7 @@ from distutils.core import Command
 from distutils.errors import DistutilsFileError
 from distutils.command.build_py import build_py
 from distutils.dist import Distribution as _Distribution
+from distutils.util import convert_path
 import subprocess
 import shutil
 import os
@@ -69,7 +70,7 @@ def ensure_slashed(pathname):
         pathname = '/' + pathname
     if not pathname.endswith('/'):
         pathname = pathname + '/'
-    return normpath(pathname) 
+    return normpath(pathname)
 
 
 
@@ -163,10 +164,10 @@ class install_data(_install_data):
         if self.root:
             self.install_dir = normpath(join(self.root, self.install_dir))
         print ('relative data_dir:%s'%self.data_dir)
-    
+
     def run(self):
         _install_data.run(self)
-        default = join(self.install_dir, self.default_config)
+        default = convert_path('data/%s'%self.default_config)
         link = join(self.install_dir, 'default.xml')
         shutil.copyfile(default, link)
 
@@ -200,14 +201,17 @@ class install(_install):
 
     user_options = _install.user_options + [
         ('install-man=', None, "directory for Unix man pages"),
-        ('default-config=', None, 
-            "Default configuration to use - can be udisks1.xml or udisks2.xml")]
+        ('default-config=', None,
+            "Default configuration to use - can be udisks1.xml or udisks2.xml"),
+        ('docbook2man=', None,
+            "path to docbook2man executable")]
 
     def initialize_options(self):
         _install.initialize_options(self)
         self.install_man = None
         self.install_data = None
         self.default_config = None
+        self.docbook2man = None
 
     def finalize_options(self):
         _install.finalize_options(self)
@@ -217,7 +221,9 @@ class install(_install):
         if self.root is not None:
             self.change_roots('man')
         if not self.default_config:
-            self.default_config='udisks1.xml'
+            self.default_config ='udisks1.xml'
+        if not self.docbook2man:
+            self.docbook2man = 'docbook2man'
 
 
 class build_manpage(Command):
@@ -231,6 +237,7 @@ class build_manpage(Command):
         self.build_base = None
         self.data_dir = None
         self.prefix = None
+        self.docbook2man = None
 
     def finalize_options(self):
         self.set_undefined_options('build',
@@ -239,6 +246,8 @@ class build_manpage(Command):
                                    ('prefix', 'prefix'))
         self.set_undefined_options('install_data',
                                    ('data_dir', 'data_dir'))
+        self.set_undefined_options('install',
+                                   ('docbook2man', 'docbook2man'))
 
     def man(self, input_file):
         """Create a manpage from docbook source file"""
@@ -253,7 +262,7 @@ class build_manpage(Command):
         patched_file = join(man_tmp_dir, basename(source))
         patch_file(self.patch_line, patched_file)
         exe = subprocess.Popen(
-            ["docbook2man", abspath(patched_file)], cwd=man_dir)
+            [self.docbook2man, abspath(patched_file)], cwd=man_dir)
         exe.communicate()
         if exe.returncode != 0:
             raise DistutilsFileError(source)
@@ -286,7 +295,7 @@ class sdist(_sdist):
     """
     user_options = _sdist.user_options + [
         ('version=', None, "version of deployed application"),
-        ('release-responsible=', None, 
+        ('release-responsible=', None,
             "Savannah account that will publish source distribution to downloads area.")]
 
     def initialize_options(self):
@@ -334,9 +343,13 @@ if __name__=='__main__':
         packages=[traydevice.__name__],
         package_dir={traydevice.__name__: 'src/traydevice'},
         package_data={traydevice.__name__: ['package.ini']},
-        data_files=[('', glob('data/*')),
-                    ('', ['README.txt']),
-                    ('', ['LICENSE.txt'])],
+        data_files=[('doc',['data/udisks1.xml',
+                            'data/udisks2.xml',
+                            'README.txt',
+                            'LICENSE.txt',]),
+                    ('',['data/logging.conf',
+                         'data/configuration.xsd']
+                      )],
         scripts=glob('scripts/*'),
         author='Martin Špelina',
         author_email='shpelda at gmail dot com',
